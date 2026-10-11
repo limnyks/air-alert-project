@@ -1,0 +1,70 @@
+
+==========================================================================================
+SETUP
+==========================================================================================
+modeled units: 104; exploration window: each unit's train_from -> 2026-05-18 00:00:00+00:00 (official only)
+
+==========================================================================================
+H1 - daily / weekly pattern of alert starts
+==========================================================================================
+units tested: 104; skipped (< 30 starts or fit error): 0; fit errors: 0; units with fitting warnings (e.g. months without starts): 0
+share of units with LR-test p < 0.001: 0.731; median LR statistic: 55.9 (df = 10)
+
+pooled start rate per off-hour by Kyiv hour of day:
+hod
+0     0.131
+1     0.121
+2     0.102
+3     0.096
+4     0.085
+5     0.064
+6     0.058
+7     0.061
+8     0.091
+9     0.129
+10    0.131
+11    0.132
+12    0.139
+13    0.132
+14    0.134
+15    0.125
+16    0.111
+17    0.106
+18    0.106
+19    0.111
+20    0.128
+21    0.144
+22    0.132
+23    0.131
+
+pooled start rate per off-hour by weekday (0 = Monday):
+dow
+0    0.111
+1    0.114
+2    0.118
+3    0.119
+4    0.117
+5    0.110
+6    0.097
+
+==========================================================================================
+H4 - clustering beyond the daily pattern and slow changes
+==========================================================================================
+median dispersion: raw Fano 0.95; Model B (pattern) 2.76; Model C (pattern + month levels) 2.74   (1 = Poisson, > 1 = clustering)
+share of units with Model C dispersion > 1.5: 1.000
+time-rescaling under Model C: share of units with KS p < 0.001: 0.731; median KS statistic 0.089; median CV of rescaled gaps 1.13 (Poisson: 1); median share of rescaled gaps < 0.1: 0.133 (Poisson: 0.095)
+
+==========================================================================================
+H3 - neighbouring raions (raion era only, after both oblasts' switch)
+==========================================================================================
+adjacent pairs of modeled raions (from HDX boundary lines): 0
+no pairs with enough data
+
+==========================================================================================
+H2 - alert durations: one distribution or two kinds?
+==========================================================================================
+units analysed: 74 (>= 200 episodes); best model by AIC: {'mixture': 74}
+share of units where the mixture beats the best single distribution by > 10 AIC: 0.959
+mixture components (medians over units): short 27.4 min (weight 0.35), long 62.0 min; overall median duration 41.1 min
+
+per-unit results -> logs/step11_unit_results.csv
