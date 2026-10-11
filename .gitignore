@@ -1,0 +1,15 @@
+# Local Python environment (recreated from requirements.txt)
+.venv/
+
+# Python cache and macOS junk
+__pycache__/
+*.pyc
+.DS_Store
+
+# Downloaded / generated data (recreated by download scripts)
+data/
+
+# Secrets: API tokens, Telegram credentials and session files
+.env
+secrets/
+*.session

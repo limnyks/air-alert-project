@@ -1,0 +1,281 @@
+
+==========================================================================================
+PART 1 - environment and files
+==========================================================================================
+python 3.12.15 | pandas 3.0.6 | numpy 2.5.4
+dataset commit: 7ccd4367b7057a4541ce109ca09cf1f0220f6a75
+downloading official_data_en.csv ...
+official_data_en.csv: 31,025,633 bytes, sha256 b396f87696243069eec0219880e87dcd642b20beb0a7bae0d0e1f61e1ed20ec4
+downloading volunteer_data_en.csv ...
+volunteer_data_en.csv: 8,892,014 bytes, sha256 e441ecaa9813c9088e41aa6f137f9917679c9721701c817a97aae3bed470e1d5
+
+==========================================================================================
+PART 2 - official: basic facts
+==========================================================================================
+rows: 299275
+columns: ['oblast', 'raion', 'hromada', 'level', 'started_at', 'finished_at', 'source']
+null values per column:
+oblast              0
+raion          130235
+hromada        262486
+level               0
+started_at          0
+finished_at         0
+source              0
+exact duplicate rows: 113845
+sorted by started_at: False
+started_at  min / max: 2022-03-15 16:10:34+00:00 / 2026-09-07 05:28:22+00:00
+finished_at min / max: 2022-03-15 16:50:07+00:00 / 2026-09-07 05:39:33+00:00
+last 3 rows by started_at:
+                oblast             raion hromada level                started_at               finished_at   source
+      Poltavska oblast  Poltavskyi raion     NaN raion 2026-09-07 04:38:21+00:00 2026-09-07 04:56:59+00:00 official
+         Sumska oblast Konotopskyi raion     NaN raion 2026-09-07 05:12:16+00:00 2026-09-07 05:38:04+00:00 official
+Dnipropetrovska oblast  Kamianskyi raion     NaN raion 2026-09-07 05:28:22+00:00 2026-09-07 05:38:32+00:00 official
+
+==========================================================================================
+PART 2 - volunteer: basic facts
+==========================================================================================
+rows: 115793
+columns: ['region', 'started_at', 'finished_at', 'naive']
+null values per column:
+region         0
+started_at     0
+finished_at    0
+naive          0
+exact duplicate rows: 0
+sorted by started_at: False
+started_at  min / max: 2022-02-25 16:36:22+00:00 / 2026-10-10 04:47:44+00:00
+finished_at min / max: 2022-02-25 17:06:22+00:00 / 2026-10-10 04:59:31+00:00
+last 3 rows by started_at:
+              region                started_at               finished_at  naive
+  Mykolaivska oblast 2026-10-10 04:39:36+00:00 2026-10-10 04:41:46+00:00  False
+      Kyivska oblast 2026-10-10 04:45:40+00:00 2026-10-10 04:52:27+00:00  False
+Kirovohradska oblast 2026-10-10 04:47:44+00:00 2026-10-10 04:59:31+00:00  False
+
+==========================================================================================
+PART 3 - official: alert levels and oblasts
+==========================================================================================
+level counts:
+level
+raion      132251
+oblast     130235
+hromada     36789
+
+rows per quarter by level (by started_at, UTC):
+level       hromada  oblast  raion
+started_at                        
+2022Q1          812    1992    508
+2022Q2         2304    9786   1092
+2022Q3         1996    8570    158
+2022Q4          840    6918     10
+2023Q1          458    6842      6
+2023Q2          432    6990      8
+2023Q3          452    9630     10
+2023Q4          872    9024      0
+2024Q1         2336   10774      2
+2024Q2         2956   11986      0
+2024Q3         1990   11212      0
+2024Q4         1710    9298      6
+2025Q1         2074    9098    814
+2025Q2         3744    8630   1500
+2025Q3         3792    7176  13002
+2025Q4         4152    1806  36090
+2026Q1         2580     193  30318
+2026Q2         2000     139  26541
+2026Q3         1289     171  22186
+
+durations, official, all rows (minutes), n = 299275
+  <= 0 min: 4   (0, 1) min: 779   > 24 h: 1318
+  quantiles: {0.01: np.float64(5.3), 0.1: np.float64(16.8), 0.25: np.float64(26.9), 0.5: np.float64(48.4), 0.75: np.float64(119.2), 0.9: np.float64(278.0), 0.99: np.float64(1077.5)}
+
+rows per oblast:
+oblast
+Dnipropetrovska oblast     45729
+Kharkivska oblast          39651
+Donetska oblast            28117
+Zaporizka oblast           26744
+Sumska oblast              21036
+Poltavska oblast           15988
+Mykolaivska oblast         15699
+Chernihivska oblast        14899
+Odeska oblast              13238
+Khersonska oblast          12648
+Kirovohradska oblast       11743
+Kyivska oblast             10951
+Cherkaska oblast           10370
+Vinnytska oblast            5021
+Zhytomyrska oblast          4711
+Kyiv City                   4141
+Khmelnytska oblast          2938
+Rivnenska oblast            2742
+Lvivska oblast              2380
+Ivano-Frankivska oblast     2228
+Volynska oblast             2169
+Ternopilska oblast          2134
+Zakarpatska oblast          2051
+Chernivetska oblast         1945
+Luhanska oblast                2
+
+==========================================================================================
+PART 4 - volunteer: naive (invented end) rows and regions
+==========================================================================================
+naive value counts:
+naive
+False    110002
+True       5791
+naive rows with duration exactly 30 min: 1.0000 (share)
+
+durations, volunteer, non-naive rows only (minutes), n = 110002
+  <= 0 min: 6   (0, 1) min: 1348   > 24 h: 14
+  quantiles: {0.01: np.float64(0.8), 0.1: np.float64(9.0), 0.25: np.float64(17.9), 0.5: np.float64(31.2), 0.75: np.float64(56.9), 0.9: np.float64(106.9), 0.99: np.float64(270.4)}
+
+per month (last 15 months): rows, naive share
+            rows  naive_share
+started_at                   
+2025-08     2156        0.052
+2025-09     2167        0.051
+2025-10     2292        0.064
+2025-11     2506        0.052
+2025-12     2464        0.048
+2026-01     2777        0.048
+2026-02     2558        0.045
+2026-03     3350        0.033
+2026-04     3001        0.037
+2026-05     3398        0.041
+2026-06     3301        0.035
+2026-07     3409        0.047
+2026-08     3916        0.045
+2026-09     4438        0.063
+2026-10     1400        0.091
+
+rows per region:
+region
+Dnipropetrovska oblast     13697
+Kharkivska oblast          12958
+Zaporizka oblast            8962
+Sumska oblast               8726
+Donetska oblast             8542
+Mykolaivska oblast          7864
+Poltavska oblast            6553
+Khersonska oblast           6425
+Kirovohradska oblast        6325
+Chernihivska oblast         5601
+Odeska oblast               4581
+Kyivska oblast              4440
+Cherkaska oblast            3884
+Kyiv City                   2665
+Zhytomyrska oblast          2317
+Volynska oblast             2194
+Vinnytska oblast            2071
+Lvivska oblast              1783
+Khmelnytska oblast          1356
+Rivnenska oblast            1273
+Ternopilska oblast          1007
+Chernivetska oblast          913
+Ivano-Frankivska oblast      892
+Zakarpatska oblast           761
+Luhanska oblast                3
+
+==========================================================================================
+PART 5 - region names in both files
+==========================================================================================
+official oblasts: 25, volunteer regions: 25, common: 25
+only in official : []
+only in volunteer: []
+names containing Luhansk / Crimea / Sevastopol: ['Luhanska oblast']
+
+==========================================================================================
+PART 6 - before vs after the alert reform (2026-09-06)
+==========================================================================================
+
+official: before = [2026-08-09, 2026-09-06), after = [2026-09-06, 2026-10-04)
+  before: rows   9264, rows/day   330.9, median duration (real ends)   48.0 min
+  after : rows    406, rows/day    14.5, median duration (real ends)   39.8 min
+
+volunteer: before = [2026-08-09, 2026-09-06), after = [2026-09-06, 2026-10-04)
+  before: rows   3830, rows/day   136.8, median duration (real ends)   18.3 min, naive share 0.045
+  after : rows   4081, rows/day   145.8, median duration (real ends)   17.0 min, naive share 0.070
+
+volunteer rows per week (weeks end on Sunday; the last week may be partial):
+                           rows  naive_share
+started_at                                  
+2026-08-02 00:00:00+00:00   784        0.050
+2026-08-09 00:00:00+00:00   756        0.045
+2026-08-16 00:00:00+00:00   808        0.053
+2026-08-23 00:00:00+00:00   876        0.055
+2026-08-30 00:00:00+00:00  1084        0.030
+2026-09-06 00:00:00+00:00  1057        0.045
+2026-09-13 00:00:00+00:00   933        0.066
+2026-09-20 00:00:00+00:00  1014        0.063
+2026-09-27 00:00:00+00:00  1152        0.069
+2026-10-04 00:00:00+00:00  1001        0.092
+2026-10-11 00:00:00+00:00   842        0.084
+
+==========================================================================================
+PART 7 - agreement between official and volunteer (overlap period)
+==========================================================================================
+overlap period (official start range): 2022-03-15 16:10:34+00:00 -> 2026-09-07 05:28:22+00:00
+official is rolled up to oblast level: union of all its oblast/raion/hromada alerts per oblast
+(= 'some part of the oblast is under alert'). Volunteer rows are used as they are.
+
+common regions compared: 25
+total volunteer alerts: 109721, total official oblast-episodes: 80288
+
+all regions pooled - share found in the other source, by matching window:
+  +- 2 min: volunteer found in official 0.481   official found in volunteer 0.658
+  +- 5 min: volunteer found in official 0.519   official found in volunteer 0.710
+  +-10 min: volunteer found in official 0.540   official found in volunteer 0.739
+  +-30 min: volunteer found in official 0.596   official found in volunteer 0.813
+
+naive volunteer alerts with an official match within 5 min (their end could be repaired): 0.105
+
+per quarter, window +-5 min:
+        vol_alerts  vol_found_in_off  off_episodes  off_found_in_vol
+q                                                                   
+2022Q1        1132             0.881          1272             0.783
+2022Q2        4948             0.952          5182             0.910
+2022Q3        4306             0.933          4256             0.947
+2022Q4        3707             0.871          3446             0.939
+2023Q1        4082             0.749          3432             0.892
+2023Q2        4240             0.726          3538             0.873
+2023Q3        5456             0.775          4849             0.872
+2023Q4        5268             0.709          4486             0.833
+2024Q1        6187             0.636          5197             0.758
+2024Q2        6795             0.606          5256             0.785
+2024Q3        6633             0.526          4567             0.765
+2024Q4        5689             0.425          3882             0.624
+2025Q1        5405             0.410          3754             0.590
+2025Q2        5422             0.408          3597             0.615
+2025Q3        6564             0.363          4130             0.578
+2025Q4        7262             0.280          3981             0.513
+2026Q1        8685             0.284          5071             0.488
+2026Q2        9700             0.284          5656             0.488
+2026Q3        8240             0.225          4736             0.392
+
+per region, window +-5 min:
+                 region  vol_alerts  off_episodes  vol_found_in_off@5m  off_found_in_vol@5m  median_|start_diff|_min  median_end_diff_min(v-o)  naive_repairable_share
+       Cherkaska oblast        3657          3571                0.787                0.806                    0.283                     0.300                   0.450
+    Chernihivska oblast        5332          4182                0.466                0.596                    0.300                     0.283                   0.295
+    Chernivetska oblast         866           870                0.942                0.941                    0.483                     0.500                   0.143
+ Dnipropetrovska oblast       12953          3417                0.144                0.546                    0.433                     0.433                   0.089
+        Donetska oblast        8409          7204                0.568                0.665                    0.367                     0.400                   0.149
+Ivano-Frankivska oblast         861           841                0.890                0.911                    0.550                     0.583                   0.182
+      Kharkivska oblast       12275          5517                0.277                0.618                    0.417                     0.400                   0.015
+      Khersonska oblast        6290          5229                0.538                0.648                    0.283                     0.283                   0.029
+     Khmelnytska oblast        1259          1273                0.768                0.760                    0.433                     0.500                   0.562
+   Kirovohradska oblast        6053          4601                0.643                0.847                    0.267                     0.217                   0.337
+              Kyiv City        2409          2267                0.759                0.807                    0.250                     0.267                   0.101
+         Kyivska oblast        3999          3083                0.520                0.676                    0.317                     0.250                   0.079
+        Luhanska oblast           2             1                0.500                1.000                    0.783                       NaN                   0.500
+         Lvivska oblast        1612           849                0.473                0.899                    0.600                     0.550                   0.000
+     Mykolaivska oblast        7369          5500                0.554                0.743                    0.250                     0.167                   0.033
+          Odeska oblast        4262          4068                0.667                0.700                    0.350                     0.183                   0.145
+       Poltavska oblast        6257          5912                0.729                0.772                    0.283                     0.267                   0.505
+       Rivnenska oblast        1140          1124                0.824                0.836                    0.383                     0.350                   0.400
+          Sumska oblast        8398          6093                0.356                0.493                    0.300                     0.267                   0.033
+     Ternopilska oblast         959           958                0.913                0.914                    0.492                     0.517                   0.571
+       Vinnytska oblast        1842          1813                0.847                0.862                    0.300                     0.317                   0.622
+        Volynska oblast        2007           934                0.420                0.900                    0.508                     0.517                   0.034
+     Zakarpatska oblast         758           754                0.967                0.975                    0.583                     0.683                   0.444
+       Zaporizka oblast        8721          8264                0.709                0.749                    0.300                     0.267                   0.224
+     Zhytomyrska oblast        2031          1963                0.702                0.727                    0.367                     0.400                   0.481
