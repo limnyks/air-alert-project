@@ -1,0 +1,171 @@
+snapshot folder: data/raw/alerts_in_ua/20261011T082201Z  (units: 24, ~14 min)
+[1/24] uid 3 Khmelnytska oblast: HTTP 200, 86,410 bytes
+    response shape: dict['alerts'], records: 197
+    started_at min / max: 2026-09-11T13:49:17.422Z / 2026-10-11T07:32:07.873Z
+    finished_at missing (ongoing?): 0
+    location_type: {'raion': 197}
+    alert_type: {'air_raid': 197}
+    fields of first record: ['alert_level', 'alert_type', 'country', 'finished_at', 'id', 'location_oblast', 'location_oblast_uid', 'location_title', 'location_title_en', 'location_type', 'location_uid', 'notes', 'started_at', 'updated_at']
+[2/24] uid 4 Vinnytska oblast: HTTP 200, 207,574 bytes
+    response shape: dict['alerts'], records: 489
+    started_at min / max: 2026-09-12T02:20:51.328Z / 2026-10-11T08:14:48.606Z
+    finished_at missing (ongoing?): 4
+    location_type: {'raion': 489}
+    alert_type: {'air_raid': 489}
+    fields of first record: ['alert_level', 'alert_type', 'country', 'finished_at', 'id', 'location_oblast', 'location_oblast_uid', 'location_title', 'location_title_en', 'location_type', 'location_uid', 'notes', 'started_at', 'updated_at']
+[3/24] uid 5 Rivnenska oblast: HTTP 200, 133,371 bytes
+    response shape: dict['alerts'], records: 315
+    started_at min / max: 2026-09-11T08:57:34.287Z / 2026-10-11T07:47:19.010Z
+    finished_at missing (ongoing?): 0
+    location_type: {'raion': 315}
+    alert_type: {'air_raid': 315}
+    fields of first record: ['alert_level', 'alert_type', 'country', 'finished_at', 'id', 'location_oblast', 'location_oblast_uid', 'location_title', 'location_title_en', 'location_type', 'location_uid', 'notes', 'started_at', 'updated_at']
+[4/24] uid 8 Volynska oblast: HTTP 200, 59,617 bytes
+    response shape: dict['alerts'], records: 140
+    started_at min / max: 2026-09-11T09:30:47.495Z / 2026-10-10T21:49:59.598Z
+    finished_at missing (ongoing?): 0
+    location_type: {'raion': 140}
+    alert_type: {'air_raid': 140}
+    fields of first record: ['alert_level', 'alert_type', 'country', 'finished_at', 'id', 'location_oblast', 'location_oblast_uid', 'location_title', 'location_title_en', 'location_type', 'location_uid', 'notes', 'started_at', 'updated_at']
+[5/24] uid 9 Dnipropetrovska oblast: HTTP 200, 1,042,093 bytes
+    response shape: dict['alerts'], records: 2288
+    started_at min / max: 2026-08-29T12:30:13.395Z / 2026-10-11T08:17:27.000Z
+    finished_at missing (ongoing?): 11
+    location_type: {'hromada': 397, 'city': 393, 'raion': 1498}
+    alert_type: {'air_raid': 2008, 'artillery_shelling': 280}
+    fields of first record: ['alert_level', 'alert_type', 'country', 'finished_at', 'id', 'location_oblast', 'location_oblast_uid', 'location_raion', 'location_title', 'location_title_en', 'location_type', 'location_uid', 'notes', 'started_at', 'updated_at']
+[6/24] uid 10 Zhytomyrska oblast: HTTP 200, 220,212 bytes
+    response shape: dict['alerts'], records: 512
+    started_at min / max: 2026-09-11T08:53:24.559Z / 2026-10-11T05:16:28.746Z
+    finished_at missing (ongoing?): 0
+    location_type: {'raion': 512}
+    alert_type: {'air_raid': 512}
+    fields of first record: ['alert_level', 'alert_type', 'country', 'finished_at', 'id', 'location_oblast', 'location_oblast_uid', 'location_title', 'location_title_en', 'location_type', 'location_uid', 'notes', 'started_at', 'updated_at']
+[7/24] uid 11 Zakarpatska oblast: HTTP 200, 7,804 bytes
+    response shape: dict['alerts'], records: 18
+    started_at min / max: 2026-09-15T16:44:25.822Z / 2026-09-17T10:23:08.644Z
+    finished_at missing (ongoing?): 0
+    location_type: {'raion': 18}
+    alert_type: {'air_raid': 18}
+    fields of first record: ['alert_level', 'alert_type', 'country', 'finished_at', 'id', 'location_oblast', 'location_oblast_uid', 'location_title', 'location_title_en', 'location_type', 'location_uid', 'notes', 'started_at', 'updated_at']
+[8/24] uid 12 Zaporizka oblast: HTTP 200, 530,357 bytes
+    response shape: dict['alerts'], records: 1205
+    started_at min / max: 2026-09-11T05:05:29.202Z / 2026-10-11T07:01:10.111Z
+    finished_at missing (ongoing?): 7
+    location_type: {'city': 167, 'hromada': 167, 'raion': 871}
+    alert_type: {'air_raid': 1205}
+    fields of first record: ['alert_level', 'alert_type', 'country', 'finished_at', 'id', 'location_oblast', 'location_oblast_uid', 'location_title', 'location_title_en', 'location_type', 'location_uid', 'notes', 'started_at', 'updated_at']
+[9/24] uid 13 Ivano-Frankivska oblast: HTTP 200, 18,796 bytes
+    response shape: dict['alerts'], records: 42
+    started_at min / max: 2026-09-12T22:00:05.164Z / 2026-10-10T18:38:17.242Z
+    finished_at missing (ongoing?): 0
+    location_type: {'raion': 42}
+    alert_type: {'air_raid': 42}
+    fields of first record: ['alert_level', 'alert_type', 'country', 'finished_at', 'id', 'location_oblast', 'location_oblast_uid', 'location_title', 'location_title_en', 'location_type', 'location_uid', 'notes', 'started_at', 'updated_at']
+[10/24] uid 14 Kyivska oblast: HTTP 200, 618,095 bytes
+    response shape: dict['alerts'], records: 1458
+    started_at min / max: 2026-09-11T08:38:20.363Z / 2026-10-11T08:05:30.618Z
+    finished_at missing (ongoing?): 5
+    location_type: {'raion': 1458}
+    alert_type: {'air_raid': 1458}
+    fields of first record: ['alert_level', 'alert_type', 'country', 'finished_at', 'id', 'location_oblast', 'location_oblast_uid', 'location_title', 'location_title_en', 'location_type', 'location_uid', 'notes', 'started_at', 'updated_at']
+[11/24] uid 15 Kirovohradska oblast: HTTP 200, 507,104 bytes
+    response shape: dict['alerts'], records: 1096
+    started_at min / max: 2026-09-11T07:37:17.743Z / 2026-10-11T07:34:36.328Z
+    finished_at missing (ongoing?): 6
+    location_type: {'raion': 660, 'hromada': 218, 'city': 218}
+    alert_type: {'air_raid': 1096}
+    fields of first record: ['alert_level', 'alert_type', 'country', 'finished_at', 'id', 'location_oblast', 'location_oblast_uid', 'location_title', 'location_title_en', 'location_type', 'location_uid', 'notes', 'started_at', 'updated_at']
+[12/24] uid 17 Mykolaivska oblast: HTTP 200, 413,136 bytes
+    response shape: dict['alerts'], records: 954
+    started_at min / max: 2026-09-11T08:16:27.293Z / 2026-10-11T07:52:08.654Z
+    finished_at missing (ongoing?): 0
+    location_type: {'raion': 953, 'oblast': 1}
+    alert_type: {'air_raid': 954}
+    fields of first record: ['alert_level', 'alert_type', 'country', 'finished_at', 'id', 'location_oblast', 'location_oblast_uid', 'location_title', 'location_title_en', 'location_type', 'location_uid', 'notes', 'started_at', 'updated_at']
+[13/24] uid 18 Odeska oblast: HTTP 200, 372,705 bytes
+    response shape: dict['alerts'], records: 876
+    started_at min / max: 2026-09-11T08:21:34.755Z / 2026-10-11T07:35:48.327Z
+    finished_at missing (ongoing?): 0
+    location_type: {'raion': 876}
+    alert_type: {'air_raid': 876}
+    fields of first record: ['alert_level', 'alert_type', 'country', 'finished_at', 'id', 'location_oblast', 'location_oblast_uid', 'location_title', 'location_title_en', 'location_type', 'location_uid', 'notes', 'started_at', 'updated_at']
+[14/24] uid 19 Poltavska oblast: HTTP 200, 325,015 bytes
+    response shape: dict['alerts'], records: 760
+    started_at min / max: 2026-09-11T07:37:17.643Z / 2026-10-11T07:28:11.015Z
+    finished_at missing (ongoing?): 4
+    location_type: {'raion': 760}
+    alert_type: {'air_raid': 760}
+    fields of first record: ['alert_level', 'alert_type', 'country', 'finished_at', 'id', 'location_oblast', 'location_oblast_uid', 'location_title', 'location_title_en', 'location_type', 'location_uid', 'notes', 'started_at', 'updated_at']
+[15/24] uid 20 Sumska oblast: HTTP 200, 440,247 bytes
+    response shape: dict['alerts'], records: 1057
+    started_at min / max: 2026-09-11T06:28:15.950Z / 2026-10-11T08:19:09.041Z
+    finished_at missing (ongoing?): 3
+    location_type: {'raion': 1057}
+    alert_type: {'air_raid': 1057}
+    fields of first record: ['alert_level', 'alert_type', 'country', 'finished_at', 'id', 'location_oblast', 'location_oblast_uid', 'location_title', 'location_title_en', 'location_type', 'location_uid', 'notes', 'started_at', 'updated_at']
+[16/24] uid 21 Ternopilska oblast: HTTP 200, 55,150 bytes
+    response shape: dict['alerts'], records: 126
+    started_at min / max: 2026-09-12T21:19:51.612Z / 2026-10-11T07:35:16.162Z
+    finished_at missing (ongoing?): 0
+    location_type: {'raion': 126}
+    alert_type: {'air_raid': 126}
+    fields of first record: ['alert_level', 'alert_type', 'country', 'finished_at', 'id', 'location_oblast', 'location_oblast_uid', 'location_title', 'location_title_en', 'location_type', 'location_uid', 'notes', 'started_at', 'updated_at']
+[17/24] uid 22 Kharkivska oblast: HTTP 200, 1,034,093 bytes
+    response shape: dict['alerts'], records: 2373
+    started_at min / max: 2024-05-20T09:31:37.000Z / 2026-10-11T07:36:28.966Z
+    finished_at missing (ongoing?): 11
+    location_type: {'raion': 1791, 'hromada': 293, 'city': 289}
+    alert_type: {'air_raid': 2370, 'artillery_shelling': 2, 'urban_fights': 1}
+    fields of first record: ['alert_level', 'alert_type', 'country', 'finished_at', 'id', 'location_oblast', 'location_oblast_uid', 'location_title', 'location_title_en', 'location_type', 'location_uid', 'notes', 'started_at', 'updated_at']
+[18/24] uid 23 Khersonska oblast: HTTP 200, 164,911 bytes
+    response shape: dict['alerts'], records: 385
+    started_at min / max: 2026-09-11T11:46:35.403Z / 2026-10-11T07:41:44.908Z
+    finished_at missing (ongoing?): 0
+    location_type: {'raion': 385}
+    alert_type: {'air_raid': 385}
+    fields of first record: ['alert_level', 'alert_type', 'country', 'finished_at', 'id', 'location_oblast', 'location_oblast_uid', 'location_title', 'location_title_en', 'location_type', 'location_uid', 'notes', 'started_at', 'updated_at']
+[19/24] uid 24 Cherkaska oblast: HTTP 200, 262,475 bytes
+    response shape: dict['alerts'], records: 614
+    started_at min / max: 2026-09-12T00:05:58.661Z / 2026-10-11T08:23:17.852Z
+    finished_at missing (ongoing?): 4
+    location_type: {'raion': 614}
+    alert_type: {'air_raid': 614}
+    fields of first record: ['alert_level', 'alert_type', 'country', 'finished_at', 'id', 'location_oblast', 'location_oblast_uid', 'location_title', 'location_title_en', 'location_type', 'location_uid', 'notes', 'started_at', 'updated_at']
+[20/24] uid 25 Chernihivska oblast: HTTP 200, 317,828 bytes
+    response shape: dict['alerts'], records: 730
+    started_at min / max: 2026-09-11T04:29:32.888Z / 2026-10-11T07:08:18.480Z
+    finished_at missing (ongoing?): 5
+    location_type: {'raion': 730}
+    alert_type: {'air_raid': 730}
+    fields of first record: ['alert_level', 'alert_type', 'country', 'finished_at', 'id', 'location_oblast', 'location_oblast_uid', 'location_title', 'location_title_en', 'location_type', 'location_uid', 'notes', 'started_at', 'updated_at']
+[21/24] uid 26 Chernivetska oblast: HTTP 200, 21,876 bytes
+    response shape: dict['alerts'], records: 50
+    started_at min / max: 2026-09-12T02:22:09.659Z / 2026-10-10T18:25:32.977Z
+    finished_at missing (ongoing?): 0
+    location_type: {'raion': 50}
+    alert_type: {'air_raid': 50}
+    fields of first record: ['alert_level', 'alert_type', 'country', 'finished_at', 'id', 'location_oblast', 'location_oblast_uid', 'location_title', 'location_title_en', 'location_type', 'location_uid', 'notes', 'started_at', 'updated_at']
+[22/24] uid 27 Lvivska oblast: HTTP 200, 20,383 bytes
+    response shape: dict['alerts'], records: 48
+    started_at min / max: 2026-09-12T22:00:06.343Z / 2026-10-11T07:47:19.261Z
+    finished_at missing (ongoing?): 0
+    location_type: {'raion': 48}
+    alert_type: {'air_raid': 48}
+    fields of first record: ['alert_level', 'alert_type', 'country', 'finished_at', 'id', 'location_oblast', 'location_oblast_uid', 'location_title', 'location_title_en', 'location_type', 'location_uid', 'notes', 'started_at', 'updated_at']
+[23/24] uid 28 Donetska oblast: HTTP 200, 242,589 bytes
+    response shape: dict['alerts'], records: 577
+    started_at min / max: 2026-09-11T00:57:48.177Z / 2026-10-10T16:20:03.985Z
+    finished_at missing (ongoing?): 8
+    location_type: {'raion': 577}
+    alert_type: {'air_raid': 577}
+    fields of first record: ['alert_level', 'alert_type', 'country', 'finished_at', 'id', 'location_oblast', 'location_oblast_uid', 'location_title', 'location_title_en', 'location_type', 'location_uid', 'notes', 'started_at', 'updated_at']
+[24/24] uid 31 Kyiv City: HTTP 200, 81,896 bytes
+    response shape: dict['alerts'], records: 217
+    started_at min / max: 2026-09-11T09:23:26.490Z / 2026-10-11T08:06:36.928Z
+    finished_at missing (ongoing?): 1
+    location_type: {'oblast': 217}
+    alert_type: {'air_raid': 217}
+    fields of first record: ['alert_level', 'alert_type', 'country', 'finished_at', 'id', 'location_oblast', 'location_oblast_uid', 'location_title', 'location_title_en', 'location_type', 'location_uid', 'notes', 'started_at', 'updated_at']
+
+done: 24/24 units OK, 16527 records, 13.5 min. Manifest: data/raw/alerts_in_ua/20261011T082201Z/manifest.json
