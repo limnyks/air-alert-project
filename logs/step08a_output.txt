@@ -1,0 +1,358 @@
+official_data_en.csv: 31,025,633 bytes, sha256 b396f87696243069eec0219880e87dcd642b20beb0a7bae0d0e1f61e1ed20ec4
+
+==========================================================================================
+SETUP
+==========================================================================================
+official rows (deduplicated): 185430; alerts.in.ua snapshot 20261011T082201Z: 16527 records
+
+==========================================================================================
+PART 1 - capital candidates per oblast (official file and alerts.in.ua)
+==========================================================================================
+
+### Vinnytska oblast -> Vinnytsia  (stems: ['vinnyts'])
+  official oblast-wide rows: 1482, last start 2025-11-02 21:36:37+00:00
+  official candidates (deduplicated rows):
+                                    rows       first        last  over_24h
+    level raion            hromada                                        
+    raion Vinnytskyi raion NaN       300  2022-06-09  2026-09-05         0
+  alerts.in.ua records for this unit: 489; location types: {'raion': 489}
+  alerts.in.ua candidates:
+                                     records  air_raid  other_types  red_share       first        last
+    location_type location_title_en                                                                   
+    raion         Vinnytsia raion        115       115            0      0.139  2026-09-12  2026-10-11
+
+### Volynska oblast -> Lutsk  (stems: ['lutsk'])
+  official oblast-wide rows: 800, last start 2025-11-02 21:36:49+00:00
+  official candidates (deduplicated rows):
+                                 rows       first        last  over_24h
+    level raion         hromada                                        
+    raion Lutskyi raion NaN       119  2025-11-06  2026-09-05         0
+  alerts.in.ua records for this unit: 140; location types: {'raion': 140}
+  alerts.in.ua candidates:
+                                     records  air_raid  other_types  red_share       first        last
+    location_type location_title_en                                                                   
+    raion         Lutsk raion             54        54            0      0.056  2026-09-11  2026-10-10
+
+### Dnipropetrovska oblast -> Dnipro  (stems: ['dnipro city', 'dniprovsk', 'dnipro '])
+  official oblast-wide rows: 5565, last start 2025-11-04 01:22:34+00:00
+  official candidates (deduplicated rows):
+                                                                            rows       first        last  over_24h
+    level   raion             hromada                                                                             
+    hromada Dniprovskyi raion m. Dnipro ta Dniprovska terytorialna hromada     5  2022-03-16  2022-05-02         0
+    raion   Dniprovskyi raion NaN                                           1826  2025-05-01  2026-09-07         0
+  alerts.in.ua records for this unit: 2288; location types: {'raion': 1498, 'hromada': 397, 'city': 393}
+  alerts.in.ua candidates:
+                                                   records  air_raid  other_types  red_share       first        last
+    location_type location_title_en                                                                                 
+    city          Dnipro city                            3         3            0      1.000  2026-09-20  2026-10-11
+    hromada       Dniprovska terytorialna hromada        3         3            0      1.000  2026-09-20  2026-10-11
+    raion         Dnipro raion                         240       240            0      0.854  2026-09-11  2026-10-11
+
+### Donetska oblast -> Kramatorsk  (stems: ['kramatorsk'])
+  official oblast-wide rows: 6877, last start 2025-11-04 06:14:19+00:00
+  official candidates (deduplicated rows):
+                                                                                  rows       first        last  over_24h
+    level   raion              hromada                                                                                  
+    hromada Kramatorskyi raion Cherkaska terytorialna hromada                        1  2022-04-25  2022-04-25         0
+                               Druzhkivska terytorialna hromada                      5  2022-03-17  2022-03-28         0
+                               Lymanska terytorialna hromada                        20  2022-03-31  2022-05-24         0
+                               Sviatohirska terytorialna hromada                    10  2022-03-18  2022-05-24         0
+                               m. Kramatorsk ta Kramatorska terytorialna hromada    18  2022-03-19  2026-06-23         0
+                               m. Sloviansk ta Slovianska terytorialna hromada       9  2022-03-18  2022-05-06         0
+    raion   Kramatorskyi raion NaN                                                1119  2022-03-15  2026-09-06        45
+  alerts.in.ua records for this unit: 577; location types: {'raion': 577}
+  alerts.in.ua candidates:
+                                     records  air_raid  other_types  red_share       first        last
+    location_type location_title_en                                                                   
+    raion         Kramatorsk raion        72        72            0      0.722  2026-09-11  2026-10-10
+
+### Zhytomyrska oblast -> Zhytomyr  (stems: ['zhytomyr'])
+  official oblast-wide rows: 1466, last start 2025-11-02 21:35:51+00:00
+  official candidates (deduplicated rows):
+                                                                                rows       first        last  over_24h
+    level   raion              hromada                                                                                
+    hromada Zhytomyrskyi raion Radomyshlska terytorialna hromada                   1  2022-03-18  2022-03-18         0
+                               m. Zhytomyr ta Zhytomyrska terytorialna hromada     1  2022-03-28  2022-03-28         0
+    raion   Zhytomyrskyi raion NaN                                               384  2022-03-15  2026-09-05         0
+  alerts.in.ua records for this unit: 512; location types: {'raion': 512}
+  alerts.in.ua candidates:
+                                     records  air_raid  other_types  red_share       first        last
+    location_type location_title_en                                                                   
+    raion         Zhytomyr raion         148       148            0      0.101  2026-09-11  2026-10-11
+
+### Zakarpatska oblast -> Uzhhorod  (stems: ['uzhhorod'])
+  official oblast-wide rows: 664, last start 2025-11-02 21:35:25+00:00
+  official candidates (deduplicated rows):
+                                      rows       first        last  over_24h
+    level raion              hromada                                        
+    raion Uzhhorodskyi raion NaN        89  2025-11-06  2026-08-07         0
+  alerts.in.ua records for this unit: 18; location types: {'raion': 18}
+  alerts.in.ua candidates:
+                                     records  air_raid  other_types  red_share       first        last
+    location_type location_title_en                                                                   
+    raion         Uzhhorod raion           3         3            0        1.0  2026-09-15  2026-09-17
+
+### Zaporizka oblast -> Zaporizhzhia  (stems: ['zaporiz'])
+  official oblast-wide rows: 6686, last start 2025-11-04 09:26:34+00:00
+  official candidates (deduplicated rows):
+                                                                                rows       first        last  over_24h
+    level   raion            hromada                                                                                  
+    hromada Zaporizkyi raion Bilenkivska terytorialna hromada                     32  2025-04-22  2026-01-27         0
+                             m. Zaporizhzhia ta Zaporizka terytorialna hromada  2317  2022-03-16  2026-09-06         2
+    raion   Zaporizkyi raion NaN                                                1507  2022-03-17  2026-09-06        13
+  alerts.in.ua records for this unit: 1205; location types: {'raion': 871, 'city': 167, 'hromada': 167}
+  alerts.in.ua candidates:
+                                                  records  air_raid  other_types  red_share       first        last
+    location_type location_title_en                                                                                
+    city          Zaporizhzhia city                   167       167            0      0.557  2026-09-11  2026-10-11
+    hromada       Zaporizka terytorialna hromada      167       167            0      0.701  2026-09-11  2026-10-11
+    raion         Zaporizhia raion                    175       175            0      0.583  2026-09-11  2026-10-11
+
+### Ivano-Frankivska oblast -> Ivano-Frankivsk  (stems: ['frankivsk'])
+  official oblast-wide rows: 742, last start 2025-11-02 21:35:47+00:00
+  official candidates (deduplicated rows):
+                                           rows       first        last  over_24h
+    level raion                   hromada                                        
+    raion Ivano-Frankivskyi raion NaN        97  2025-11-06  2026-08-07         0
+  alerts.in.ua records for this unit: 42; location types: {'raion': 42}
+  alerts.in.ua candidates:
+                                         records  air_raid  other_types  red_share       first        last
+    location_type location_title_en                                                                       
+    raion         Ivano-Frankivsk raion       14        14            0      0.286  2026-09-12  2026-10-10
+
+### Kyivska oblast -> Bila Tserkva  (stems: ['bilotserk', 'bila tserk'])
+  official oblast-wide rows: 1950, last start 2025-11-04 01:22:09+00:00
+  official candidates (deduplicated rows):
+                                                                                          rows       first        last  over_24h
+    level   raion                 hromada                                                                                       
+    hromada Bilotserkivskyi raion Skvyrska terytorialna hromada                              2  2022-03-15  2022-03-22         0
+                                  Uzynska terytorialna hromada                               3  2022-03-18  2022-03-23         0
+                                  m. Bila Tserkva ta Bilotserkivska terytorialna hromada    20  2022-03-15  2022-03-24         0
+    raion   Bilotserkivskyi raion NaN                                                      542  2025-07-24  2026-09-06         0
+  alerts.in.ua records for this unit: 1458; location types: {'raion': 1458}
+  alerts.in.ua candidates:
+                                      records  air_raid  other_types  red_share       first        last
+    location_type location_title_en                                                                    
+    raion         Bila Tserkva raion      188       188            0      0.096  2026-09-12  2026-10-11
+
+### Kirovohradska oblast -> Kropyvnytskyi  (stems: ['kropyvnyts'])
+  official oblast-wide rows: 3344, last start 2025-11-03 01:57:40+00:00
+  official candidates (deduplicated rows):
+                                       rows       first        last  over_24h
+    level raion               hromada                                        
+    raion Kropyvnytskyi raion NaN      1101  2022-03-16  2026-09-06         1
+  alerts.in.ua records for this unit: 1096; location types: {'raion': 660, 'hromada': 218, 'city': 218}
+  alerts.in.ua candidates:
+                                       records  air_raid  other_types  red_share       first        last
+    location_type location_title_en                                                                     
+    raion         Kropyvnytskyi raion      204       204            0      0.127  2026-09-11  2026-10-11
+
+### Lvivska oblast -> Lviv  (stems: ['lviv'])
+  official oblast-wide rows: 745, last start 2025-11-02 21:36:32+00:00
+  official candidates (deduplicated rows):
+                                  rows       first        last  over_24h
+    level raion          hromada                                        
+    raion Lvivskyi raion NaN        98  2025-09-03  2026-08-07         0
+  alerts.in.ua records for this unit: 48; location types: {'raion': 48}
+  alerts.in.ua candidates:
+                                     records  air_raid  other_types  red_share       first        last
+    location_type location_title_en                                                                   
+    raion         Lviv raion               6         6            0        0.5  2026-09-12  2026-10-10
+
+### Mykolaivska oblast -> Mykolaiv  (stems: ['mykolai'])
+  official oblast-wide rows: 3681, last start 2025-11-04 07:21:13+00:00
+  official candidates (deduplicated rows):
+                                                                                 rows       first        last  over_24h
+    level   raion              hromada                                                                                 
+    hromada Mykolaivskyi raion Berezanska terytorialna hromada                      1  2022-05-04  2022-05-04         0
+                               Halytsynivska terytorialna hromada                   1  2022-05-04  2022-05-04         0
+                               Koblivska terytorialna hromada                       1  2022-05-04  2022-05-04         0
+                               Kostiantynivska terytorialna hromada                 5  2022-03-18  2022-05-04         0
+                               Kutsurubska terytorialna hromada                     1  2022-05-04  2022-05-04         0
+                               Mishkovo-Pohorilivska terytorialna hromada           1  2022-05-04  2022-05-04         0
+                               Pervomaiska terytorialna hromada                    23  2022-03-21  2023-11-07         0
+                               Stepivska terytorialna hromada                       1  2022-05-04  2022-05-04         0
+                               Vesnianska terytorialna hromada                      1  2022-05-04  2022-05-04         0
+                               Voskresenska terytorialna hromada                    2  2022-03-21  2022-05-04         0
+                               m. Mykolaiv ta Mykolaivska terytorialna hromada     69  2022-03-16  2022-10-19         0
+                               m. Nova-Odesa ta Novoodeska terytorialna hromada     1  2022-05-04  2022-05-04         0
+                               m. Ochakiv ta Ochakivska terytorialna hromada        3  2022-03-23  2022-05-04         0
+    raion   Mykolaivskyi raion NaN                                               1554  2022-03-18  2026-09-07         0
+  alerts.in.ua records for this unit: 954; location types: {'raion': 953, 'oblast': 1}
+  alerts.in.ua candidates:
+                                     records  air_raid  other_types  red_share       first        last
+    location_type location_title_en                                                                   
+    oblast        Mykolaiv Oblast          1         1            0      0.000  2026-10-02  2026-10-02
+    raion         Mykolaiv raion         359       359            0      0.089  2026-09-11  2026-10-11
+
+### Odeska oblast -> Odesa  (stems: ['odes'])
+  official oblast-wide rows: 2411, last start 2025-11-04 07:34:32+00:00
+  official candidates (deduplicated rows):
+                                 rows       first        last  over_24h
+    level raion         hromada                                        
+    raion Odeskyi raion NaN      1380  2022-03-16  2026-09-06         0
+  alerts.in.ua records for this unit: 876; location types: {'raion': 876}
+  alerts.in.ua candidates:
+                                     records  air_raid  other_types  red_share       first        last
+    location_type location_title_en                                                                   
+    raion         Odesa raion            255       255            0      0.098  2026-09-11  2026-10-10
+
+### Poltavska oblast -> Poltava  (stems: ['poltav'])
+  official oblast-wide rows: 3993, last start 2025-11-01 05:17:05+00:00
+  official candidates (deduplicated rows):
+                                                                           rows       first        last  over_24h
+    level   raion            hromada                                                                             
+    hromada Poltavskyi raion m. Poltava ta Poltavska terytorialna hromada    19  2022-03-16  2022-04-27         0
+    raion   Poltavskyi raion NaN                                           1718  2025-08-01  2026-09-07         0
+  alerts.in.ua records for this unit: 760; location types: {'raion': 760}
+  alerts.in.ua candidates:
+                                     records  air_raid  other_types  red_share       first        last
+    location_type location_title_en                                                                   
+    raion         Poltava raion          251       251            0      0.112  2026-09-11  2026-10-11
+
+### Rivnenska oblast -> Rivne  (stems: ['rivn'])
+  official oblast-wide rows: 892, last start 2025-10-27 16:36:33+00:00
+  official candidates (deduplicated rows):
+                                                                         rows       first        last  over_24h
+    level   raion            hromada                                                                           
+    hromada Rivnenskyi raion m. Rivne ta Rivnenska terytorialna hromada     2  2022-03-20  2022-03-21         0
+    raion   Rivnenskyi raion NaN                                          186  2025-08-20  2026-09-05         0
+  alerts.in.ua records for this unit: 315; location types: {'raion': 315}
+  alerts.in.ua candidates:
+                                     records  air_raid  other_types  red_share       first        last
+    location_type location_title_en                                                                   
+    raion         Rivne raion            106       106            0      0.038  2026-09-11  2026-10-11
+
+### Sumska oblast -> Sumy  (stems: ['sumy', 'sumsk'])
+  official oblast-wide rows: 4078, last start 2025-10-23 05:47:15+00:00
+  official candidates (deduplicated rows):
+                                                                  rows       first        last  over_24h
+    level   raion         hromada                                                                       
+    hromada Sumskyi raion m. Sumy ta Sumska terytorialna hromada    10  2022-03-15  2023-10-02         0
+    raion   Sumskyi raion NaN                                     2198  2022-03-16  2026-09-07         7
+  alerts.in.ua records for this unit: 1057; location types: {'raion': 1057}
+  alerts.in.ua candidates:
+                                     records  air_raid  other_types  red_share       first        last
+    location_type location_title_en                                                                   
+    raion         Sumy raion             249       249            0      0.474  2026-09-11  2026-10-11
+
+### Ternopilska oblast -> Ternopil  (stems: ['ternop'])
+  official oblast-wide rows: 842, last start 2025-11-02 21:36:59+00:00
+  official candidates (deduplicated rows):
+                                      rows       first        last  over_24h
+    level raion              hromada                                        
+    raion Ternopilskyi raion NaN       114  2025-11-06  2026-09-03         0
+  alerts.in.ua records for this unit: 126; location types: {'raion': 126}
+  alerts.in.ua candidates:
+                                     records  air_raid  other_types  red_share       first        last
+    location_type location_title_en                                                                   
+    raion         Ternopil raion          42        42            0      0.071  2026-09-12  2026-10-11
+
+### Kharkivska oblast -> Kharkiv  (stems: ['kharkiv'])
+  official oblast-wide rows: 6504, last start 2025-10-19 07:41:25+00:00
+  official candidates (deduplicated rows):
+                                                                             rows       first        last  over_24h
+    level   raion             hromada                                                                              
+    hromada Kharkivskyi raion Derhachivska terytorialna hromada                 7  2022-07-19  2022-10-07         0
+                              Lypetska terytorialna hromada                     4  2022-10-07  2026-01-06         1
+                              Pisochynska terytorialna hromada                  1  2022-07-27  2022-07-27         0
+                              Tsyrkunivska terytorialna hromada                 4  2022-07-29  2022-10-07         0
+                              m. Kharkiv ta Kharkivska terytorialna hromada  3580  2022-05-03  2026-09-07         1
+    raion   Kharkivskyi raion NaN                                            2821  2022-03-16  2026-09-07         2
+  alerts.in.ua records for this unit: 2373; location types: {'raion': 1791, 'hromada': 293, 'city': 289}
+  alerts.in.ua candidates:
+                                                   records  air_raid  other_types  red_share       first        last
+    location_type location_title_en                                                                                 
+    city          Kharkiv city                         289       289            0      0.443  2026-09-11  2026-10-11
+    hromada       Kharkivska terytorialna hromada      289       289            0      0.495  2026-09-11  2026-10-11
+    raion         Kharkiv raion                        327       327            0      0.419  2026-09-11  2026-10-11
+
+### Khersonska oblast -> Kherson  (stems: ['kherson'])
+  official oblast-wide rows: 3575, last start 2025-11-04 11:59:58+00:00
+  official candidates (deduplicated rows):
+                                                                             rows       first        last  over_24h
+    level   raion             hromada                                                                              
+    hromada Khersonskyi raion Oleshkivska terytorialna hromada                  3  2022-03-28  2022-04-09         0
+                              m. Kherson ta Khersonska terytorialna hromada     1  2022-04-14  2022-04-14         0
+    raion   Khersonskyi raion NaN                                            1229  2025-08-30  2026-09-06         0
+  alerts.in.ua records for this unit: 385; location types: {'raion': 385}
+  alerts.in.ua candidates:
+                                     records  air_raid  other_types  red_share       first        last
+    location_type location_title_en                                                                   
+    raion         Kherson raion          111       111            0      0.261  2026-09-11  2026-10-11
+
+### Khmelnytska oblast -> Khmelnytskyi  (stems: ['khmelnyts'])
+  official oblast-wide rows: 1030, last start 2025-08-20 09:20:12+00:00
+  official candidates (deduplicated rows):
+                                                                                                  rows       first        last  over_24h
+    level   raion              hromada                                                                                                  
+    hromada Khmelnytskyi raion m. Starokostiantyniv ta Starokostiantynivska terytorialna hromada    21  2022-03-15  2022-10-12         0
+    raion   Khmelnytskyi raion NaN                                                                 204  2025-07-26  2026-09-05         0
+  alerts.in.ua records for this unit: 197; location types: {'raion': 197}
+  alerts.in.ua candidates:
+                                      records  air_raid  other_types  red_share       first        last
+    location_type location_title_en                                                                    
+    raion         Khmelnytskyi raion       83        83            0       0.06  2026-09-11  2026-10-11
+
+### Cherkaska oblast -> Cherkasy  (stems: ['cherkas'])
+  official oblast-wide rows: 2459, last start 2025-11-04 01:21:58+00:00
+  official candidates (deduplicated rows):
+                                                                            rows       first        last  over_24h
+    level   raion            hromada                                                                              
+    hromada Cherkaskyi raion Smilianska terytorialna hromada                   2  2022-03-16  2022-03-18         0
+                             m. Cherkasy ta Cherkaska terytorialna hromada    10  2022-03-16  2022-03-31         0
+    raion   Cherkaskyi raion NaN                                            1059  2022-03-18  2026-09-06         0
+  alerts.in.ua records for this unit: 614; location types: {'raion': 614}
+  alerts.in.ua candidates:
+                                     records  air_raid  other_types  red_share       first        last
+    location_type location_title_en                                                                   
+    raion         Cherkasy raion         177       177            0      0.169  2026-09-12  2026-10-11
+
+### Chernivetska oblast -> Chernivtsi  (stems: ['chernivts', 'chernivet'])
+  official oblast-wide rows: 747, last start 2025-11-02 21:36:30+00:00
+  official candidates (deduplicated rows):
+                                       rows       first        last  over_24h
+    level raion               hromada                                        
+    raion Chernivetskyi raion NaN       107  2022-06-07  2026-09-05         0
+  alerts.in.ua records for this unit: 50; location types: {'raion': 50}
+  alerts.in.ua candidates:
+                                     records  air_raid  other_types  red_share       first        last
+    location_type location_title_en                                                                   
+    raion         Chernivtsi raion        13        13            0      0.308  2026-09-12  2026-10-10
+
+### Chernihivska oblast -> Chernihiv  (stems: ['chernihiv'])
+  official oblast-wide rows: 2513, last start 2025-10-22 23:14:05+00:00
+  official candidates (deduplicated rows):
+                                       rows       first        last  over_24h
+    level raion               hromada                                        
+    raion Chernihivskyi raion NaN      1636  2022-03-22  2026-09-06         2
+  alerts.in.ua records for this unit: 730; location types: {'raion': 730}
+  alerts.in.ua candidates:
+                                     records  air_raid  other_types  red_share       first        last
+    location_type location_title_en                                                                   
+    raion         Chernihiv raion        192       192            0      0.057  2026-09-11  2026-10-11
+
+### Kyiv City -> Kyiv City  (stems: [])
+  official oblast-wide rows: 2267, last start 2026-09-05 23:22:48+00:00
+  alerts.in.ua records for this unit: 217; location types: {'oblast': 217}
+  alerts.in.ua candidates:
+                                     records  air_raid  other_types  red_share       first        last
+    location_type location_title_en                                                                   
+    oblast        Kyiv city              217       217            0      0.074  2026-09-11  2026-10-11
+
+==========================================================================================
+PART 2 - alerts.in.ua alerts that started before the window: present in the official file?
+==========================================================================================
+alerts.in.ua alerts started before 2026-09-11 08:22:01+00:00: 56; official file last start: 2026-09-07 05:28:22+00:00
+
+counts (aggregated, no raw records):
+started_before_official_end  alert_type          official_match_5min
+False                        air_raid            False                  48
+                             artillery_shelling  False                   4
+True                         air_raid            False                   1
+                             artillery_shelling  False                   1
+                                                 True                    1
+                             urban_fights        True                    1
+
+matched in official: 2 of 4 that started before the official file ended
+  of matched: official record ends at/after the official cutoff: 0; alerts.in.ua still running: 2
