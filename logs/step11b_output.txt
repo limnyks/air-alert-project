@@ -1,0 +1,51 @@
+
+==========================================================================================
+SETUP
+==========================================================================================
+modeled units: 104; official data before 2026-05-18 00:00:00+00:00
+
+==========================================================================================
+PART A - raion neighbours from HDX shapes
+==========================================================================================
+downloading ukr_admin_boundaries.geojson.zip (~84 MB) ...
+data/raw/hdx/ukr_admin_boundaries.geojson.zip: 83,953,609 bytes
+files in zip: ['ukr_admin1.geojson', 'ukr_admin0.geojson', 'ukr_admin2.geojson', 'ukr_adminlines.geojson', 'ukr_admin3.geojson', 'ukr_admincapitals.geojson', 'ukr_adminpoints.geojson', 'ukr_admin4.geojson']
+raion layer: ukr_admin2.geojson
+features: 139; property keys: ['adm0_name', 'adm0_name1', 'adm0_name2', 'adm0_name3', 'adm0_pcode', 'adm1_name', 'adm1_name1', 'adm1_name2', 'adm1_name3', 'adm1_pcode', 'adm2_name', 'adm2_name1', 'adm2_name2', 'adm2_name3', 'adm2_pcode', 'area_sqkm', 'center_lat', 'center_lon', 'lang', 'lang1', 'lang2', 'lang3', 'valid_on', 'valid_to', 'version']
+Kyiv City HDX code from the 'Київ' feature: ['UA8000']
+modeled units with an HDX shape: 104 of 104
+coordinates rounded to 6 decimals: 256 neighbour pairs; neighbours per unit min 1, median 5.0, max 9; units without neighbours: 0
+saved 256 pairs -> config/raion_adjacency.csv (derived from HDX COD-AB, CC BY-IGO)
+
+==========================================================================================
+PART B - H4 exact time-rescaling under Model C (real data)
+==========================================================================================
+units tested: 104
+share of units with KS p < 0.001: 0.702; median KS 0.086; median CV 1.13 (Poisson 1); median share of gaps < 0.1: 0.138 (Poisson 0.095)
+
+==========================================================================================
+PART C - calibration: same pipeline on simulated NON-clustered data
+==========================================================================================
+                                      unit  real_starts  sim_starts  sim_ks_p  sim_cv  sim_short  real_ks_p  real_cv  real_short
+       Lvivska oblast / Drohobytskyi raion           67          66    0.5002  0.9079     0.0308     0.0009   1.0835      0.3030
+          Lvivska oblast / Stryiskyi raion           73          69    0.8518  0.8413     0.0735     0.0002   1.1095      0.3333
+Vinnytska oblast / Mohyliv-Podilskyi raion          148         166    0.6476  1.0195     0.0909     0.0000   1.2681      0.2313
+         Kyivska oblast / Buchanskyi raion          289         260    0.9161  0.9031     0.0659     0.0135   1.2855      0.1597
+          Odeska oblast / Izmailskyi raion          553         562    0.6080  0.9556     0.0716     0.0004   1.2433      0.1304
+    Zakarpatska oblast / Tiachivskyi raion          731         721    0.8140  0.9250     0.0875     0.0000   1.0678      0.1973
+       Rivnenska oblast / Sarnenskyi raion         1028        1038    0.9120  0.9624     0.1004     0.0000   1.0832      0.1772
+      Khersonska oblast / Skadovskyi raion         3872        3787    0.2767  0.9767     0.0875     0.0001   1.1277      0.1100
+         Sumska oblast / Konotopskyi raion         5326        5567    0.1531  0.9774     0.0896     0.0149   1.1610      0.1031
+     Kharkivska oblast / Kharkivskyi raion         8176        8484    0.2860  1.0009     0.0870     0.0003   1.0993      0.0971
+
+simulated units rejected at p < 0.001: 0 of 10 (a valid test should reject ~0); real units rejected: 8 of 10
+
+==========================================================================================
+PART D - H3 neighbouring raions (raion era only)
+==========================================================================================
+directed pairs analysed: 500; median common window 196 days
+             co_share  co_null  co_ratio  lead_share  lead_null  lead_ratio
+same_oblast                                                                
+False           0.349    0.003   118.125       0.134      0.068       1.750
+True            0.706    0.004   187.250       0.062      0.078       0.928
+share of directed pairs with lead ratio > 1.5: 0.484
