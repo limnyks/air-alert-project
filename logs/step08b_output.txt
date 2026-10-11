@@ -1,0 +1,190 @@
+official_data_en.csv: 31,025,633 bytes, sha256 b396f87696243069eec0219880e87dcd642b20beb0a7bae0d0e1f61e1ed20ec4
+volunteer_data_en.csv: 8,892,014 bytes, sha256 e441ecaa9813c9088e41aa6f137f9917679c9721701c817a97aae3bed470e1d5
+
+==========================================================================================
+SETUP
+==========================================================================================
+capitals: 24; official 2022-03-15 16:10:34+00:00 -> 2026-09-07 05:28:22+00:00; alerts.in.ua snapshot 20261011T082201Z
+adaptation week: 2026-09-11 08:22:01+00:00 -> 2026-09-18 08:22:01+00:00; final test: 2026-09-18 08:22:01+00:00 -> 2026-10-10 04:47:00+00:00 (volunteer end) / 2026-10-11 08:22:01+00:00 (snapshot)
+
+==========================================================================================
+BUILD - capital episodes (merged on/off periods)
+==========================================================================================
+                 official_rows  official_episodes  aic_records  aic_episodes  aic_censored official_last
+capital                                                                                                 
+Vinnytsia                 1782               1781          115           115             1    2026-09-05
+Lutsk                      919                919           54            54             0    2026-09-05
+Dnipro                    7396               7362          246           240             0    2026-09-07
+Kramatorsk                8014               7864           72            71             1    2026-09-06
+Zhytomyr                  1851               1848          148           148             0    2026-09-05
+Uzhhorod                   753                753            3             3             0    2026-08-07
+Zaporizhzhia             10510               8194          509           163             1    2026-09-06
+Ivano-Frankivsk            839                839           14            14             0    2026-08-07
+Bila Tserkva              2512               2500          188           188             0    2026-09-06
+Kropyvnytskyi             4445               4439          204           204             1    2026-09-06
+Lviv                       843                843            6             6             0    2026-08-07
+Mykolaiv                  5304               5259          360           359             0    2026-09-07
+Odesa                     3791               3789          255           255             0    2026-09-06
+Poltava                   5730               5724          251           251             1    2026-09-07
+Rivne                     1080               1079          106           106             0    2026-09-05
+Sumy                      6286               6272          249           249             1    2026-09-07
+Ternopil                   956                956           42            42             0    2026-09-03
+Kharkiv                  12905               9279          905           311             1    2026-09-07
+Kherson                   4805               4802          111           111             0    2026-09-06
+Khmelnytskyi              1234               1234           83            83             0    2026-09-05
+Cherkasy                  3528               3492          177           177             1    2026-09-06
+Chernivtsi                 854                853           13            13             0    2026-09-05
+Chernihiv                 4149               4146          192           192             1    2026-09-06
+Kyiv                      2267               2267          217           217             1    2026-09-05
+check: every capital has episodes in both sources - OK; no overlaps after merge - OK
+saved 90066 episodes -> data/processed/capital_episodes.csv (local only)
+
+gaps between consecutive episodes (minutes, pooled):
+  official      n=86470  <=1 min 0.004  <=2 min 0.008  <=5 min 0.024  median 178.5
+  alerts_in_ua  n=3548  <=1 min 0.011  <=2 min 0.026  <=5 min 0.055  median 57.3
+
+==========================================================================================
+CHECK A - how much alert time comes only from city/hromada records
+==========================================================================================
+                 official_extra_share  aic_extra_share  official_hromada_rows_over_24h
+capital                                                                               
+Vinnytsia                      0.0000           0.0000                               0
+Lutsk                          0.0000           0.0000                               0
+Dnipro                         0.0003           0.0001                               0
+Kramatorsk                     0.0006           0.0000                               0
+Zhytomyr                       0.0000           0.0000                               0
+Uzhhorod                       0.0000           0.0000                               0
+Zaporizhzhia                   0.0007           0.0028                               2
+Ivano-Frankivsk                0.0000           0.0000                               0
+Bila Tserkva                   0.0057           0.0000                               0
+Kropyvnytskyi                  0.0000           0.0000                               0
+Lviv                           0.0000           0.0000                               0
+Mykolaiv                       0.0068           0.0000                               0
+Odesa                          0.0000           0.0000                               0
+Poltava                        0.0022           0.0000                               0
+Rivne                          0.0012           0.0000                               0
+Sumy                           0.0003           0.0000                               0
+Ternopil                       0.0000           0.0000                               0
+Kharkiv                        0.0065           0.0100                               1
+Kherson                        0.0000           0.0000                               0
+Khmelnytskyi                   0.0000           0.0000                               0
+Cherkasy                       0.0010           0.0000                               0
+Chernivtsi                     0.0000           0.0000                               0
+Chernihiv                      0.0000           0.0000                               0
+Kyiv                           0.0000           0.0000                               0
+
+==========================================================================================
+CHECK B - label structure switch (official): share before vs after, rule x1.5
+==========================================================================================
+                     switch  before  after  ratio  train_from                          note
+capital                                                                                    
+Vinnytsia        2025-11-02   0.070  0.042  0.599  2025-11-02             after switch only
+Lutsk            2025-11-02   0.021  0.015  0.708  2022-03-15                  full history
+Dnipro           2025-11-04   0.254  0.232  0.914  2022-03-15                  full history
+Kramatorsk       2025-11-04   0.630  0.900  1.429  2022-03-15                  full history
+Zhytomyr         2025-11-02   0.112  0.059  0.528  2025-11-02             after switch only
+Uzhhorod         2025-11-02   0.014  0.010  0.701  2022-03-15                  full history
+Zaporizhzhia     2025-11-04   0.302  0.748  2.480  2025-11-04             after switch only
+Ivano-Frankivsk  2025-11-02   0.018  0.012  0.669  2022-03-15                  full history
+Bila Tserkva     2025-11-04   0.188  0.065  0.343  2025-11-04             after switch only
+Kropyvnytskyi    2025-11-03   0.172  0.140  0.816  2022-03-15                  full history
+Lviv             2025-11-02   0.018  0.012  0.654  2025-11-02             after switch only
+Mykolaiv         2025-11-04   0.131  0.190  1.445  2022-03-15                  full history
+Odesa            2025-11-04   0.080  0.152  1.893  2025-11-04             after switch only
+Poltava          2025-11-01   0.305  0.293  0.962  2022-03-15                  full history
+Rivne            2025-10-27   0.034  0.025  0.747  2022-03-15                  full history
+Sumy             2025-10-23   0.640  0.676  1.056  2022-03-15                  full history
+Ternopil         2025-11-02   0.024  0.016  0.648  2025-11-02             after switch only
+Kharkiv          2025-10-19   0.444  0.599  1.349  2022-03-15                  full history
+Kherson          2025-11-04   0.118  0.199  1.677  2025-11-04             after switch only
+Khmelnytskyi     2025-08-20   0.061  0.026  0.425  2025-08-20             after switch only
+Cherkasy         2025-11-04   0.192  0.113  0.590  2025-11-04             after switch only
+Chernivtsi       2025-11-02   0.019  0.014  0.747  2022-03-15                  full history
+Chernihiv        2025-10-22   0.348  0.374  1.074  2022-03-15                  full history
+Kyiv                   None     NaN    NaN    NaN  2022-03-15  oblast-level unit, no switch
+
+monthly shares (official, all capitals) saved -> logs/step08b_monthly_share_official.csv
+last 12 months, selected capitals:
+           Kyiv  Kharkiv  Dnipro   Odesa    Lviv  Kramatorsk
+2025-10  0.0725   0.4496  0.1975  0.0638  0.0240      0.8535
+2025-11  0.0677   0.4423  0.2197  0.2173  0.0168      0.8945
+2025-12  0.0538   0.3103  0.1564  0.2618  0.0162      0.8388
+2026-01  0.0798   0.3878  0.3207  0.0892  0.0092      0.8685
+2026-02  0.0669   0.6672  0.3130  0.0995  0.0280      0.9216
+2026-03  0.0469   0.6522  0.2301  0.1421  0.0146      0.9099
+2026-04  0.0347   0.6149  0.1609  0.1282  0.0081      0.8244
+2026-05  0.0698   0.6392  0.2201  0.1085  0.0202      0.8729
+2026-06  0.0461   0.7222  0.2538  0.0944  0.0051      0.9374
+2026-07  0.0697   0.7679  0.2397  0.1991  0.0019      0.9516
+2026-08  0.1070   0.8092  0.1846  0.1794  0.0011      0.9701
+2026-09  0.2101   0.7984  0.3478  0.0890  0.0000      0.9717
+
+==========================================================================================
+CHECK C - consistency official -> alerts.in.ua
+==========================================================================================
+(1) before/after statistics: official last 28 days vs alerts.in.ua whole snapshot window
+                 share_pre  share_post  episodes_per_day_pre  episodes_per_day_post  median_min_pre  median_min_post
+capital                                                                                                             
+Vinnytsia            0.030       0.140                 1.250                  3.833          25.583           30.523
+Lutsk                0.002       0.052                 0.250                  1.800           9.800           22.578
+Dnipro               0.211       0.245                 5.357                  7.967          37.217           28.979
+Kramatorsk           0.969       0.971                 2.036                  2.333         324.217          282.045
+Zhytomyr             0.034       0.233                 1.179                  4.933          35.483           39.324
+Uzhhorod             0.000       0.002                 0.000                  0.100             NaN           19.867
+Zaporizhzhia         0.916       0.912                 3.857                  5.400         150.233           95.567
+Ivano-Frankivsk      0.000       0.012                 0.000                  0.467             NaN           28.093
+Bila Tserkva         0.083       0.348                 2.107                  6.267          35.533           46.709
+Kropyvnytskyi        0.298       0.358                 3.929                  6.800          32.475           45.861
+Lviv                 0.000       0.008                 0.000                  0.200             NaN           22.456
+Mykolaiv             0.268       0.416                 8.143                 11.933          34.967           33.642
+Odesa                0.168       0.227                 6.250                  8.467          23.883           27.845
+Poltava              0.333       0.460                 5.036                  8.367          64.750           51.410
+Rivne                0.009       0.120                 0.500                  3.533          24.583           29.933
+Sumy                 0.831       0.727                 5.214                  8.300         101.917           69.659
+Ternopil             0.005       0.047                 0.250                  1.400          31.433           21.288
+Kharkiv              0.812       0.674                 7.071                 10.333          84.792           56.757
+Kherson              0.212       0.120                 5.321                  3.700          35.633           35.607
+Khmelnytskyi         0.015       0.108                 0.571                  2.767          33.308           29.861
+Cherkasy             0.158       0.365                 3.107                  5.900          39.350           52.885
+Chernivtsi           0.001       0.017                 0.071                  0.433          17.575           42.747
+Chernihiv            0.460       0.785                 4.929                  6.367          56.817          100.721
+Kyiv                 0.147       0.322                 3.214                  7.233          38.300           33.517
+
+(2) volunteer bridge (healthy regions): Jaccard of volunteer oblast alert time with the capital series
+                             capital  jaccard_vs_official_last_90d  jaccard_vs_aic_window
+region                                                                                   
+Kharkivska oblast            Kharkiv                         0.256                  0.284
+Kyivska oblast          Bila Tserkva                         0.226                  0.206
+Dnipropetrovska oblast        Dnipro                         0.261                  0.247
+Mykolaivska oblast          Mykolaiv                         0.459                  0.423
+
+==========================================================================================
+CHECK D - saturation (exclude if > 80% of time under alert)
+==========================================================================================
+                 share_last_92d_train  share_adaptation_week  exclude
+capital                                                              
+Vinnytsia                       0.033                  0.097    False
+Lutsk                           0.004                  0.063    False
+Dnipro                          0.231                  0.263    False
+Kramatorsk                      0.958                  0.945     True
+Zhytomyr                        0.043                  0.198    False
+Uzhhorod                        0.002                  0.007    False
+Zaporizhzhia                    0.905                  0.881     True
+Ivano-Frankivsk                 0.003                  0.022    False
+Bila Tserkva                    0.057                  0.217    False
+Kropyvnytskyi                   0.185                  0.341    False
+Lviv                            0.003                  0.030    False
+Mykolaiv                        0.224                  0.373    False
+Odesa                           0.156                  0.305    False
+Poltava                         0.328                  0.410    False
+Rivne                           0.013                  0.148    False
+Sumy                            0.816                  0.755     True
+Ternopil                        0.005                  0.043    False
+Kharkiv                         0.770                  0.657    False
+Kherson                         0.190                  0.209    False
+Khmelnytskyi                    0.013                  0.104    False
+Cherkasy                        0.109                  0.299    False
+Chernivtsi                      0.006                  0.009    False
+Chernihiv                       0.382                  0.609    False
+Kyiv                            0.085                  0.115    False
+excluded by rule: ['Kramatorsk', 'Zaporizhzhia', 'Sumy']
