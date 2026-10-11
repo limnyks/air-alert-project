@@ -59,6 +59,10 @@ Updated at the end of every step, after the user approves the changes.
 | D25 | 2026-10-11 | **Text data stays in the plan** (user: "telegram or news is important"). Text is still added only after the alert-history model works and kept only if it beats "without text" on the same test period (D7). Source to be chosen then: news websites (lower legal risk, slower), GDELT (open, but did not help in another project), Telegram (fastest signals, but **Telegram terms forbid using its data for ML**; needs the user's API credentials; risk of account limits; raw messages not publishable). Suggested order: news first, Telegram if needed and the user accepts the terms risk | Drop Telegram/text / keep text | User decision; risks disclosed before deciding |
 | D26 | 2026-10-11 | **Capital labels (Step 8 plan, finalized after 3 self-critiques):** (A) rule R1 for all capitals: capital under alert = oblast-wide alert in its oblast OR its raion OR its own city/hromada; other hromadas in the raion excluded; mapping in `config/capitals.csv` (every name verified verbatim against `logs/step08a_output.txt`). (B) official labels changed structure (oblast-wide alerts stop ~Oct–Nov 2025): if a capital's time-under-alert share after its switch differs from the 12 months before by more than ×1.5 either way, train it only after the switch, else full history; parameters shared across capitals. (C) consistency official→alerts.in.ua: adaptation week 2026-09-11 → 09-17 (re-estimate each capital's baseline level), final test 2026-09-18 → 10-10; evidence = volunteer bridge in healthy regions (Kharkivska, Kyivska, Dnipropetrovska, Mykolaivska) + before/after statistics; the 56-alert overlap check dropped (only 4 usable cases). (D) a capital is excluded if under alert > 80% of time in the last 3 training months or in the adaptation week (rule fixed before seeing the numbers) | R1 / R2 (raion only) | Step 8a: no non-air-raid alerts at capitals in alerts.in.ua; Kharkiv/Zaporizhzhia have city-level alerts a raion-only rule would miss |
 | D27 | 2026-10-11 | **Step 8b outcomes (finalized after 3 self-critiques):** (1) gap rule: join gaps ≤ 2 min in both sources (0/5 min reported as sensitivity); (2) capital rule R1 confirmed (city/hromada add < 1.1% of alert time); (3) training start per capital from Check B: after-switch only for Vinnytsia, Zhytomyr, Zaporizhzhia, Bila Tserkva, Lviv, Odesa, Ternopil, Kherson, Khmelnytskyi, Cherkasy; full history for the rest; parameters shared across capitals; (4) adaptation week estimates one shared post-reform level multiplier + per-capital multipliers shrunk toward it; the "no adaptation" variant is also reported; (5) **excluded by the 80% rule: Kramatorsk, Zaporizhzhia, Sumy** → 21 capitals modeled; the 3 shown on the map as "near-permanent alert (>80% of time)", not gray; (6) **no design decision may use data after 2026-09-18 08:22 UTC; the final test window is touched once** | — | Step 8b output |
+| D28 | 2026-10-11 | **Units = raions (supersedes the capital target of D23/D24 for the main model).** Each raion is modeled; the map draws raions inside thick oblast borders (6 of 7 raions on alert → 6 red raions); per-oblast summaries from the joint simulation: P(all raions), P(at least one), expected share. Raion state = oblast-wide alert OR an alert for that raion (hromada/city-level alerts left for the later drill-down; Check A showed they add < 1.1% for capitals). Kyiv City stays one unit. The capital work (Step 8) is kept as a cross-check (capital ≈ its raion). Data sources, windows and rules of D23/D26/D27 carry over to raions (80% saturation rule and ×1.5 switch rule applied per raion) | A capitals first, then raions / B raions now | User chose B: the alert system announces raions since 2025; the user wants oblasts drawn as their raions |
+| D29 | 2026-10-11 | **Raion units (Step 10b):** 119 units (118 raions + Kyiv City) built; **15 excluded by the 80% rule** (all 8 Donetska raions, all 5 Zaporizka raions, Synelnykivskyi, Sumskyi) → **104 modeled units**; 61 units train after their oblast's switch, 58 on full history (`logs/step10b_raion_checks.csv`). Renamed raions handled by `config/raion_aliases.csv` | — | Step 10b output; rules fixed in D26/D27 |
+| D30 | 2026-10-11 | **Occupied raions:** model all 104 units now (alerts announced for occupied raions are valid official labels and carry signal for neighbours); at the map step get the official list (Мінрозвитку order №376, new version in force since 2026-06-05; retry data.gov.ua after maintenance, then zakon.rada.gov.ua via browser); occupied raions drawn hatched, scores reported for all units and for controlled-only units. If the list stays unavailable: README limitation | Model now + resolve at map step / resolve before modeling | On 2026-10-11 no official machine-readable version was reachable (ministry page has no files; data.gov.ua HTTP 503 maintenance; NSDI no download links; zakon.rada HTTP 403 for automated requests). Occupation affects the map and reporting, not label correctness |
+| D31 | 2026-10-11 | **Evaluation protocol frozen** (section 12): raion units, primary = macro Brier skill score of the map target vs the best baseline on the post-reform test; plus pre-reform test block, secondary target, adaptation sanity scores, prospective snapshots, controlled-only reporting. Further changes only via a new decision entry | — | User: "freeze the protocol" |
 
 **Evaluation (D10/D11, to be frozen before modeling):** proper scoring rules (log-likelihood, Brier) with walk-forward windows; time-rescaling theorem goodness-of-fit (rescaled inter-arrival times ~ Exp(1), KS test); calibration; significance of score differences across windows; durations: log-score and CRPS with censoring.
 **Implementation caveat:** unverified whether a ready Hawkes library works on our Python/Mac; fallback is our own likelihood with scipy, or an hourly logistic model whose inputs are the Hawkes kernel sums (discretized version of the same process).
@@ -152,6 +156,23 @@ _Only facts seen in actual output, tagged with the step they came from._
 - Check C: volunteer-bridge Jaccard before → after: Kharkiv 0.256 → 0.284, Bila Tserkva 0.226 → 0.206, Dnipro 0.261 → 0.247, Mykolaiv 0.459 → 0.423 (stable → supports same capital definition in both sources). Time under alert, official last 28 days → alerts.in.ua window: Kyiv 0.147 → 0.322, Zhytomyr 0.034 → 0.233, Bila Tserkva 0.083 → 0.348, Rivne 0.009 → 0.120, Chernihiv 0.460 → 0.785; front stable (Kramatorsk 0.969 → 0.971, Zaporizhzhia 0.916 → 0.912). Official Kyiv monthly share already 0.107 (Aug) → 0.210 (1–7 Sep) before the source change → the jump is at least partly real. Kyiv 7.233 episodes/day after vs Слово і діло 130+32 alerts to 30 Sep (processing sanity check, not independent).
 - Check D (share last 92 training days / adaptation week): Kramatorsk 0.958 / 0.945, Zaporizhzhia 0.905 / 0.881, Sumy 0.816 / 0.755 → excluded; Kharkiv 0.770 / 0.657 kept. Share = minutes under alert / minutes in window on a 1-minute grid (minutes rounded outward: overstatement ≤ 2 min per episode, i.e. ≤ ~1–1.4 percentage points for Kyiv/Kharkiv; no decision flips).
 
+**Step 10a (script `scripts/step10a_raion_mapping.py`, output `logs/step10a_output.txt`, mapping `config/raions.csv`, aliases `config/raion_aliases.csv`):**
+- `official_data_uk.csv`: 41,302,286 bytes, sha256 `1f500854…`; 299,275 rows, row-aligned with the English file (same start times and levels).
+- 118 distinct raions in the official file (excluding Luhanska), one-to-one English↔Ukrainian names.
+- alerts.in.ua ID list: 1,622 rows (25 oblasts, 2 special cities, 126 raions, 1,469 hromadas).
+- **3 renamed raions** (old name only in the official file; new name in ID list, snapshot and HDX, same oblast): Красноградський → Берестинський (ID 127, HDX UA6306), Володимир-Волинський → Володимирський (ID 38, UA0702), Червоноградський → Шептицький (ID 92, UA4612).
+- After aliases: 118/118 raions with exactly one alerts.in.ua ID; 0 snapshot raions unmapped; oblast cross-check 118 compared, 0 different; 118/118 with exactly one HDX code (`ukr_admin2`: adm2_name = English, adm2_name1 = Ukrainian; 139 HDX raions). Every raion has raion-level official alerts and snapshot records.
+- 21 HDX raions without data: Crimea (10), Sevastopol, Luhanska (8), Chornobyl exclusion zone, Kyiv (= our Kyiv City unit).
+- alerts.in.ua `location_oblast_uid` is NOT the oblast ID (values 134–136 inside Khmelnytska); `location_oblast` holds the Ukrainian oblast name.
+- HDX XLSX also contains `ukr_adminlines` (boundary lines with `right_pcod` / `left_pcod`) → raion adjacency without geometry.
+
+**Step 10b (script `scripts/step10b_build_raion_episodes.py`, output `logs/step10b_output.txt`, per-unit checks `logs/step10b_raion_checks.csv`; episodes local only `data/processed/raion_episodes.csv`):**
+- 119 units; **461,816 episodes** (official 447,831; alerts.in.ua 13,985; censored 51); no unit missing in a source.
+- Gaps after the ≤ 2 min rule: official ≤ 5 min 0.016, ≤ 10 min 0.040 (median 174.2 min); alerts.in.ua 0.034 / 0.078 (median 66.1 min).
+- Excluded (share last 92 training days / adaptation week): Donetska raions all 0.958 / 0.945 (identical → raions always alerted together); Zaporizka raions 0.904–0.905 / 0.876; Synelnykivskyi 0.911 / 0.894; Sumskyi 0.816 / 0.755.
+- Capital raions match Step 8b capitals (e.g. Kharkivskyi 0.766 vs Kharkiv 0.770; Dniprovskyi 0.231 vs Dnipro 0.231; Kramatorskyi 0.958 vs 0.958; Zaporizkyi 0.904 vs 0.905).
+- Modeled units (104), medians before (official, last 28 days) → after (alerts.in.ua window): share 0.087 → 0.148; episodes/day 2.321 → 3.700; median duration 36.992 → 33.361 min; 20 units had no alert in the last 28 pre-reform days.
+
 - **Conclusion:** the disagreement is mainly a **definition difference** ("any part of the oblast", inflated by long local frontline alerts and the raion shift) rather than volunteer timing errors — except the unexplained western excess.
 
 - **Interpretation (Step 5, superseded by Step 6 above):** low agreement is mostly a definition difference (volunteer may log a new region alert per local alert; the union roll-up merges them, and long official alerts swallow many volunteer alerts), not timing errors. → **Splicing sources (D17 option 1) is not safe.**
@@ -199,6 +220,9 @@ _Status: untested / confirmed / rejected. These come from background knowledge, 
 |---|------|-----------------|-------------------|-----|
 | M1 | Step 1 | Assistant stated H1/H2 from background knowledge, labeled only softly as "expectation" | User asked the assistant to restate the rules; self-check | Moved them to an explicit hypotheses list; they count as facts only once confirmed by output |
 | M2 | Plan review | Plan was pipeline- and UI-centered with ad hoc features; no mathematical model of the alert process | User caught it: "mathematical calculations have to underpin every action" | Rebuilt the core around an on/off point process (intensity λ, survival S, simulation); each hypothesis got a mathematical test (D10, D11) |
+| M7 | Step 10a | Assumed alerts.in.ua `location_oblast_uid` is the oblast's ID; it is not (values 134–136 inside Khmelnytska), so the first oblast cross-check compared nothing and silently passed | Assistant while verifying the renamed raions | Cross-check now uses `location_oblast` (Ukrainian oblast name) and prints how many raions were compared (118 compared, 0 different) |
+| M6 | Step 10a | HDX column detection only accepted `object` dtype, but pandas 3 stores text as `str` → HDX step skipped ("no sheet found") although we use pandas 3.0.6 since Step 5 | Assistant reading the Step 10a output | Detection uses `pd.api.types.is_string_dtype`; rerun matched 118/118 HDX codes |
+| M5 | Step 9.1 | Said the final test is "23 days"; origins 2026-09-18 08:22 → 2026-10-10 08:22 are 22 days | Assistant while answering the user's question "why only 23 days" | Corrected in the protocol (12.9) |
 | M4 | Step 6 / D18 | Proposed alerts.in.ua (source B) as "a free token you request" without saying the token could be refused or delayed, and missed that its 1-month history makes every day of delay lose test-period data | User: "You have never mentioned this risk and it is not okay" | Full risk table with fallbacks given; permanent rule: every option lists its dependencies and what happens if each fails |
 | M3 | Step 5 | Part 6 divided official "after" rows by 28 days although the official file covers only ~1.2 days after 2026-09-06 → misleading "14.5 rows/day" (real rate ≈ 330/day, same as before) | Assistant while reading the output | Ignore that number; future scripts divide by the days actually covered by the data |
 
@@ -248,6 +272,9 @@ Answered: A → D4, B → D5 + D8, C → D6, D → D7, Q1 → deadline not relev
 | 7c | Tie-breaker attempt + Telegram terms check | none (read-only web) | Article not independent (uses alerts.in.ua); Telegram terms forbid using its data for ML → decision D23: train official (to 7 Sep), test alerts.in.ua (11 Sep → 10 Oct), target = oblast capital |
 | 8a | Find each capital's names in both sources | `scripts/step08a_find_capitals.py` → `logs/step08a_output.txt` | All 24 capitals found; no non-air-raid alerts at capitals; official oblast-wide alerts stop Oct–Nov 2025; mapping `config/capitals.csv`; solutions A–D finalized (D26) |
 | 8b | Build capital episodes and run checks A–D | `scripts/step08b_build_capital_episodes.py` → `logs/step08b_output.txt` | 90,066 episodes; R1 confirmed; 10 capitals train after switch; post-reform level jump in rear capitals (partly real); Kramatorsk, Zaporizhzhia, Sumy excluded → 21 capitals; D27 |
+| 9.1 | Evaluation protocol (draft → frozen for raions) | none (document) | Section 12; D31 |
+| 10a | Raion list and name matching across sources | `scripts/step10a_raion_mapping.py` → `logs/step10a_output.txt` | 118 raions; 3 renamings found and verified; 118/118 IDs and HDX codes; bugs M6, M7 found and fixed |
+| 10b | Raion episodes and per-unit checks | `scripts/step10b_build_raion_episodes.py` → `logs/step10b_output.txt` | 461,816 episodes; 15 saturated raions excluded → 104 modeled; 61 train after switch; capital cross-check consistent (D29). Occupied list not reachable → D30 |
 
 ---
 
@@ -339,3 +366,64 @@ _Found 2026-10-11. All numbers are the authors' own claims from their pages; nob
 | R7 | Misleading map users | Low | Disclaimer; "data as of" timestamp; data-quality marker per region; probabilities, not certainties | Low |
 
 **Planned order:** Step 6 run diagnostics (R3 evidence) → Step 7 reference labels for the test period (R1, R2, R4) → Step 8 standard episodes table: states, gap rule, interval censoring, repairs (R3–R5) → exploration & hypotheses → models with robustness checks → README data quality, disclaimer, map markers (R6, R7).
+
+---
+
+## 12. Evaluation protocol — FROZEN 2026-10-11 (D31; change only via a new decision entry)
+
+### 12.1 Units, labels, periods
+- **Units:** the 104 modeled units in `logs/step10b_raion_checks.csv` (`excluded == False`): 103 raions + Kyiv City. The 15 excluded raions are shown as "near-permanent alert (> 80 % of time)" and reported descriptively only.
+- **Labels:** `data/processed/raion_episodes.csv` — unit under alert = oblast-wide alert OR an alert for the raion; alerts.in.ua air_raid only; gaps ≤ 2 min joined; alerts running at the snapshot censored.
+- **Training data:** official file from each unit's `train_from` to 2026-09-07 05:28 UTC.
+- **Validation (all model choices):** 4 folds × 14 days, 2026-05-18 → 2026-07-13; refit before each fold on data up to the fold start minus a 24 h purge.
+- **Pre-reform test (secondary):** forecast origins 2026-07-13 00:00 → 2026-09-06 05:00 UTC (labels to the official end); model fitted on data up to 2026-07-12 00:00 (24 h purge), parameters fixed during the block.
+- **Gap:** 2026-09-07 05:28 → 2026-09-11 08:22 — no data; never imputed.
+- **Adaptation week:** 2026-09-11 08:22 → 2026-09-18 08:22 (alerts.in.ua): one shared post-reform level multiplier + per-unit multipliers shrunk toward it; warm-up history for inputs. Not used for model choices.
+- **Post-reform test (PRIMARY, "latest period"):** forecast origins 2026-09-18 09:00 → 2026-10-10 08:00 UTC on full hours (22 days; labels to the snapshot 2026-10-11 08:22). Model fitted on all training data, then adapted. Touched once; run date and git commit recorded in NOTES.
+- **Prospective test (extension):** after freezing the model, further alerts.in.ua snapshots add only days after 2026-10-11 08:22; reported separately; the model is not changed.
+
+### 12.2 Forecast targets (unit u, origin t on every full UTC hour)
+1. **Map target (primary):** P(X_u(t+h) = 1 | history before t), h = 1 … 24 h; X_u = instantaneous alert state.
+2. **Secondary map target:** P(any alert of u during (t+h−1 h, t+h]), h = 1 … 24 h.
+3. **Next start:** distribution of the next start time in hourly bins k = 1 … 24 and "> 24 h", at origins where u is off.
+4. **Duration:** (a) at each alert start: distribution of its duration; (b) at origins where u is on with elapsed e: distribution of the remaining duration.
+- Inputs: only events that started before t; running alerts have unknown ends; history lookback ≤ 72 h.
+
+### 12.3 Metrics and claims
+- **Primary metric:** Brier skill score of the map target averaged over h = 1 … 24, **macro-averaged over units** (each unit counts equally), vs the **best baseline** = the baseline with the best validation Brier score (chosen before any test).
+- Also: log loss; micro averages (report only); reliability table (10 bins) + ECE, "confident but wrong" share (≥ 0.8 or ≤ 0.2 and wrong), PR-AUC (report only).
+- Next start: log score of the binned distribution; Brier for P(start within 1 / 3 / 6 h).
+- Duration: censoring-aware log score; CRPS; pinball loss 10 / 50 / 90 %; coverage of the 80 % interval.
+- Point-process fit: time-rescaling test (rescaled inter-start times ~ Exp(1), KS statistic) per unit, on training and test.
+- **Uncertainty:** day-block bootstrap (resample whole UTC days, 2,000 replicates), 95 % intervals for every metric and every model-minus-baseline difference.
+- **Claim rule:** "X beats Y" only if the 95 % interval of the macro score difference excludes 0. Per-unit results reported without claims.
+- **Map threshold** (if red/gray): 0.5 on calibrated probabilities; not tuned.
+- **Report only:** scores of the frozen model on the adaptation week (sanity check, never used to change choices).
+- **Reporting versions:** all 104 units, and controlled-only units once the official occupied list is available (D30).
+
+### 12.4 Baselines
+- B1 climatology: per unit, share of time under alert by hour-of-week over the last 8 weeks before the data cut.
+- B2 calibrated persistence: P(on at t+h | state at t), per unit and h, from training data.
+- B3 7-day rolling share of time under alert before t.
+- Durations: Kaplan–Meier per unit (training). Next start: empirical off-duration distribution per unit (training).
+- In the post-reform test all baselines get the same adaptation multipliers as the models.
+
+### 12.5 Model ladder (each step must beat the previous by the claim rule on validation; stop climbing when it does not)
+- M0 inhomogeneous Poisson starts (daily/weekly Fourier terms + causal slowly varying trend) + parametric survival durations; outputs by Monte Carlo simulation (joint across units → per-oblast summaries).
+- M1 + self-excitation (Hawkes, exponential kernel). M2 + cross-unit excitation by rings of neighbouring raions (adjacency from HDX `ukr_adminlines` left/right pcodes; fallback: HDX polygons). M3 + regime adaptation (one mechanism: recency weighting or window). M4 + text (D25). ML challenger: gradient boosting per horizon on the same inputs (D14).
+
+### 12.6 Model selection
+- All hyperparameters and ladder decisions on the 4 validation folds only; criterion: macro log loss of the map target.
+
+### 12.7 Leakage tests (must pass before any test run)
+- Inputs and λ(t) identical when computed from full data, data cut at t, and data with fake alerts added after t; deliberately leaky inputs must make the test fail; lag guard (lag ≤ 0 → error); trend in μ(t) from the past only.
+
+### 12.8 Sensitivity analyses (report only)
+- Gap rule 0 / 2 / 5 min; raion state with vs without hromada/city alerts; with vs without adaptation; censored ends as interval-censored vs excluded; all units vs controlled-only.
+
+### 12.9 Known limits
+- Primary test is 22 days (origins 2026-09-18 → 2026-10-10; "23" was a miscount, M5) → wide intervals; pre-reform test and validation reported as secondary evidence.
+- Aggregate test-period statistics were seen in Steps 8b and 10b (shares, episode rates) → documented; no further use before the single run.
+- Training labels pre-reform from the official file, test labels post-reform from alerts.in.ua; consistency supported only indirectly (Step 8b Check C).
+- 61 units have only ~10 months of training history (after their switch).
+- Occupied status unresolved at freeze time (D30).

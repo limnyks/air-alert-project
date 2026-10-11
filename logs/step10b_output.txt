@@ -1,0 +1,105 @@
+official_data_en.csv: 31,025,633 bytes, sha256 b396f87696243069eec0219880e87dcd642b20beb0a7bae0d0e1f61e1ed20ec4
+
+==========================================================================================
+SETUP
+==========================================================================================
+units: 119 (raions + Kyiv City); official 2022-03-15 16:10:34+00:00 -> 2026-09-07 05:28:22+00:00; snapshot 20261011T082201Z; adaptation 2026-09-11 08:22:01+00:00 -> 2026-09-18 08:22:01+00:00; gap rule <= 2 min
+
+==========================================================================================
+BUILD
+==========================================================================================
+episodes: 461816 (official 447831, alerts.in.ua 13985, censored 51)
+units with no episodes in a source: none
+saved -> data/processed/raion_episodes.csv (local only); per-unit checks -> logs/step10b_raion_checks.csv
+
+gaps between episodes after the <= 2 min rule (minutes):
+  official      n=447712  <=5 min 0.016  <=10 min 0.040  median 174.2
+  alerts_in_ua  n=13866  <=5 min 0.034  <=10 min 0.078  median 66.1
+
+==========================================================================================
+SATURATION (excluded units) and SWITCH RULE
+==========================================================================================
+excluded by the 80% rule: 15 of 119
+                                         unit  share_last92_train  share_adaptation
+Dnipropetrovska oblast / Synelnykivskyi raion               0.911             0.894
+          Donetska oblast / Bakhmutskyi raion               0.958             0.945
+            Donetska oblast / Donetskyi raion               0.958             0.945
+           Donetska oblast / Horlivskyi raion               0.958             0.945
+           Donetska oblast / Kalmiuskyi raion               0.958             0.945
+         Donetska oblast / Kramatorskyi raion               0.958             0.945
+         Donetska oblast / Mariupolskyi raion               0.958             0.945
+           Donetska oblast / Pokrovskyi raion               0.958             0.945
+          Donetska oblast / Volnovaskyi raion               0.958             0.945
+                Sumska oblast / Sumskyi raion               0.816             0.755
+         Zaporizka oblast / Berdianskyi raion               0.905             0.876
+       Zaporizka oblast / Melitopolskyi raion               0.905             0.876
+         Zaporizka oblast / Polohivskyi raion               0.904             0.876
+         Zaporizka oblast / Vasylivskyi raion               0.905             0.876
+          Zaporizka oblast / Zaporizkyi raion               0.904             0.876
+
+train after switch only: 61 units; full history: 58
+                         units  excluded  after_switch
+oblast                                                
+Cherkaska oblast             4         0             4
+Chernihivska oblast          5         0             1
+Chernivetska oblast          3         0             0
+Dnipropetrovska oblast       7         1             1
+Donetska oblast              8         8             0
+Ivano-Frankivska oblast      6         0             5
+Kharkivska oblast            7         0             1
+Khersonska oblast            5         0             2
+Khmelnytska oblast           3         0             3
+Kirovohradska oblast         4         0             2
+Kyiv City                    1         0             0
+Kyivska oblast               7         0             6
+Lvivska oblast               7         0             7
+Mykolaivska oblast           4         0             1
+Odeska oblast                7         0             4
+Poltavska oblast             4         0             2
+Rivnenska oblast             4         0             1
+Sumska oblast                5         1             1
+Ternopilska oblast           3         0             3
+Vinnytska oblast             6         0             6
+Volynska oblast              4         0             1
+Zakarpatska oblast           6         0             2
+Zaporizka oblast             5         5             5
+Zhytomyrska oblast           4         0             3
+
+==========================================================================================
+BEFORE (official, last 28 days) vs AFTER (alerts.in.ua window) - modeled units only
+==========================================================================================
+       share_pre28  share_post  eps_per_day_pre28  eps_per_day_post  median_min_pre28  median_min_post
+count      104.000     104.000            104.000           104.000            84.000          104.000
+mean         0.152       0.210              2.525             3.963            40.966           38.556
+std          0.182       0.202              2.308             3.093            19.770           18.538
+min          0.000       0.002              0.000             0.100             0.100           15.419
+10%          0.000       0.003              0.000             0.133            23.996           20.101
+50%          0.087       0.148              2.321             3.700            36.992           33.361
+90%          0.391       0.503              5.664             8.160            66.106           58.713
+max          0.807       0.785              7.964            11.700           109.650          111.197
+
+capital raions (compare with the Step 8b capital table):
+                                             unit  share_last92_train  share_adaptation  excluded train_from
+              Cherkaska oblast / Cherkaskyi raion               0.109             0.299     False 2025-11-04
+        Chernihivska oblast / Chernihivskyi raion               0.382             0.609     False 2022-03-15
+        Chernivetska oblast / Chernivetskyi raion               0.006             0.009     False 2022-03-15
+       Dnipropetrovska oblast / Dniprovskyi raion               0.231             0.263     False 2022-03-15
+             Donetska oblast / Kramatorskyi raion               0.958             0.945      True 2022-03-15
+Ivano-Frankivska oblast / Ivano-Frankivskyi raion               0.003             0.022     False 2022-03-15
+            Kharkivska oblast / Kharkivskyi raion               0.766             0.645     False 2022-03-15
+            Khersonska oblast / Khersonskyi raion               0.190             0.209     False 2025-11-04
+          Khmelnytska oblast / Khmelnytskyi raion               0.013             0.104     False 2025-08-20
+       Kirovohradska oblast / Kropyvnytskyi raion               0.185             0.341     False 2022-03-15
+           Kyivska oblast / Bilotserkivskyi raion               0.057             0.217     False 2025-11-04
+                  Lvivska oblast / Lvivskyi raion               0.003             0.030     False 2025-11-02
+          Mykolaivska oblast / Mykolaivskyi raion               0.225             0.373     False 2022-03-15
+                    Odeska oblast / Odeskyi raion               0.156             0.305     False 2025-11-04
+              Poltavska oblast / Poltavskyi raion               0.328             0.410     False 2022-03-15
+              Rivnenska oblast / Rivnenskyi raion               0.013             0.148     False 2022-03-15
+                    Sumska oblast / Sumskyi raion               0.816             0.755      True 2022-03-15
+          Ternopilska oblast / Ternopilskyi raion               0.005             0.043     False 2025-11-02
+              Vinnytska oblast / Vinnytskyi raion               0.033             0.097     False 2025-11-02
+                  Volynska oblast / Lutskyi raion               0.004             0.063     False 2022-03-15
+          Zakarpatska oblast / Uzhhorodskyi raion               0.002             0.007     False 2022-03-15
+              Zaporizka oblast / Zaporizkyi raion               0.904             0.876      True 2025-11-04
+          Zhytomyrska oblast / Zhytomyrskyi raion               0.043             0.198     False 2025-11-02
