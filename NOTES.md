@@ -371,6 +371,8 @@ _Found 2026-10-11. All numbers are the authors' own claims from their pages; nob
 
 ## 12. Evaluation protocol — FROZEN 2026-10-11 (D31; change only via a new decision entry)
 
+_Frozen text committed in `d369009`._
+
 ### 12.1 Units, labels, periods
 - **Units:** the 104 modeled units in `logs/step10b_raion_checks.csv` (`excluded == False`): 103 raions + Kyiv City. The 15 excluded raions are shown as "near-permanent alert (> 80 % of time)" and reported descriptively only.
 - **Labels:** `data/processed/raion_episodes.csv` — unit under alert = oblast-wide alert OR an alert for the raion; alerts.in.ua air_raid only; gaps ≤ 2 min joined; alerts running at the snapshot censored.
