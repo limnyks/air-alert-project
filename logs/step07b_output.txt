@@ -1,0 +1,268 @@
+volunteer_data_en.csv: 8,892,014 bytes, sha256 e441ecaa9813c9088e41aa6f137f9917679c9721701c817a97aae3bed470e1d5
+
+==========================================================================================
+SETUP
+==========================================================================================
+alerts.in.ua snapshot 20261011T082201Z: 16527 records, 24 units
+comparison window: 2026-09-11 08:22:01+00:00 -> 2026-10-10 04:47:44+00:00 (volunteer data ends at w1)
+volunteer alerts in window: 4380; alerts.in.ua air_raid records: 16244 (other types excluded: 283)
+
+==========================================================================================
+PART 1 - alert_level values (all alerts.in.ua records)
+==========================================================================================
+level
+yellow    10246
+red        6281
+
+alert_type x alert_level:
+level                red  yellow
+alert_type                      
+air_raid            6003   10241
+artillery_shelling   277       5
+urban_fights           1       0
+
+air_raid only - share of each level by oblast:
+level                      red  yellow     n
+name                                        
+Cherkaska oblast         0.184   0.816   614
+Chernihivska oblast      0.101   0.899   730
+Chernivetska oblast      0.260   0.740    50
+Dnipropetrovska oblast   0.848   0.152  2008
+Donetska oblast          0.723   0.277   577
+Ivano-Frankivska oblast  0.476   0.524    42
+Kharkivska oblast        0.524   0.476  2370
+Khersonska oblast        0.283   0.717   385
+Khmelnytska oblast       0.071   0.929   197
+Kirovohradska oblast     0.253   0.747  1096
+Kyiv City                0.074   0.926   217
+Kyivska oblast           0.086   0.914  1458
+Lvivska oblast           0.438   0.562    48
+Mykolaivska oblast       0.105   0.895   954
+Odeska oblast            0.148   0.852   876
+Poltavska oblast         0.150   0.850   760
+Rivnenska oblast         0.051   0.949   315
+Sumska oblast            0.554   0.446  1057
+Ternopilska oblast       0.071   0.929   126
+Vinnytska oblast         0.192   0.808   489
+Volynska oblast          0.086   0.914   140
+Zakarpatska oblast       1.000   0.000    18
+Zaporizka oblast         0.597   0.403  1205
+Zhytomyrska oblast       0.115   0.885   512
+
+air_raid only - share of each level by week (week ending Sunday):
+level                    red  yellow     n
+started_at                                
+2026-03-09/2026-03-15  1.000   0.000     1
+2026-09-07/2026-09-13  0.487   0.513  1227
+2026-09-14/2026-09-20  0.464   0.536  3729
+2026-09-21/2026-09-27  0.344   0.656  3925
+2026-09-28/2026-10-04  0.333   0.667  3530
+2026-10-05/2026-10-11  0.299   0.701  3832
+
+air_raid, finished only - duration (minutes) by level:
+          count   mean    std  min   10%   25%   50%    75%    90%     max
+level                                                                     
+red      5977.0  169.2  358.2  0.2  17.1  26.8  55.4  144.4  343.8  6809.1
+yellow  10205.0   76.6  123.3  0.3  12.7  22.4  42.0   83.0  161.2  2279.8
+
+==========================================================================================
+PART 2 - Kyiv City 1:1 (both sources oblast-level)
+==========================================================================================
+alerts.in.ua location_type for Kyiv City: {'oblast': 217}
+  vol_alerts             134
+  aic_episodes           217
+  vol_in_aic@2m          0.321
+  aic_in_vol@2m          0.198
+  vol_in_aic@5m          0.410
+  aic_in_vol@5m          0.253
+  vol_in_aic@10m         0.522
+  aic_in_vol@10m         0.323
+  start_near_start       0.410
+  start_inside           0.500
+  start_outside          0.090
+  time_vol               0.098
+  time_aic               0.320
+  jaccard                0.212
+  P(aic|vol)             0.743
+  P(vol|aic)             0.229
+
+  matched within 5 min: 55 of 134 volunteer alerts
+  start difference volunteer - aic (min): median 0.30, 10%/90% 0.21 / 2.98
+  end difference volunteer - aic, real ends (min): median 0.28, 10%/90% -0.05 / 2.20
+
+  volunteer alerts without an aic start within 5 min: 79 (naive among them: 28)
+               started_at               finished_at  naive
+2026-09-11 09:47:12+00:00 2026-09-11 10:17:12+00:00   True
+2026-09-11 15:31:41+00:00 2026-09-11 16:01:41+00:00   True
+2026-09-11 20:53:24+00:00 2026-09-11 21:23:24+00:00   True
+2026-09-12 09:26:28+00:00 2026-09-12 09:34:20+00:00  False
+2026-09-12 21:05:26+00:00 2026-09-12 21:12:30+00:00  False
+2026-09-13 12:20:15+00:00 2026-09-13 12:50:15+00:00   True
+2026-09-13 19:42:32+00:00 2026-09-13 19:44:30+00:00  False
+2026-09-13 22:30:22+00:00 2026-09-13 23:00:22+00:00   True
+2026-09-14 08:58:37+00:00 2026-09-14 09:28:37+00:00   True
+2026-09-14 14:49:33+00:00 2026-09-14 15:19:33+00:00   True
+
+==========================================================================================
+PART 3 - all oblasts: volunteer vs alerts.in.ua air_raid rolled up per oblast ('any part')
+==========================================================================================
+time-based agreement (shares of window minutes):
+                         vol_alerts  aic_episodes  time_vol  time_aic  jaccard  P(aic|vol)  P(vol|aic)
+region                                                                                                
+Zakarpatska oblast                0             3     0.000     0.002    0.000         NaN       0.000
+Lvivska oblast                  113            17     0.071     0.016    0.086       0.098       0.424
+Ternopilska oblast               17            42     0.134     0.046    0.126       0.150       0.439
+Donetska oblast                 100            71     0.154     0.971    0.158       0.997       0.158
+Volynska oblast                 117            62     0.150     0.062    0.178       0.214       0.518
+Chernihivska oblast             149           185     0.162     0.832    0.189       0.977       0.190
+Zaporizka oblast                190           163     0.179     0.913    0.194       0.991       0.194
+Sumska oblast                   249           267     0.176     0.830    0.204       0.969       0.206
+Kyiv City                       134           217     0.098     0.320    0.212       0.743       0.229
+Kyivska oblast                  381           237     0.161     0.701    0.222       0.973       0.224
+Dnipropetrovska oblast          579            10     0.225     0.995    0.226       1.000       0.226
+Khersonska oblast               108           255     0.117     0.273    0.235       0.632       0.272
+Odeska oblast                   254           345     0.111     0.409    0.236       0.895       0.243
+Kharkivska oblast               555             1     0.254     1.000    0.254       1.000       0.254
+Zhytomyrska oblast              166           223     0.115     0.352    0.278       0.885       0.289
+Poltavska oblast                203           241     0.174     0.556    0.286       0.933       0.292
+Khmelnytska oblast               57           102     0.051     0.129    0.290       0.792       0.313
+Cherkaska oblast                142           220     0.157     0.455    0.291       0.877       0.303
+Kirovohradska oblast            208           252     0.184     0.591    0.295       0.959       0.298
+Ivano-Frankivska oblast           7            14     0.005     0.012    0.349       0.929       0.358
+Vinnytska oblast                124           139     0.076     0.198    0.361       0.952       0.368
+Rivnenska oblast                 87           123     0.070     0.148    0.427       0.929       0.441
+Mykolaivska oblast              410           380     0.220     0.495    0.429       0.976       0.434
+Chernivetska oblast              30            32     0.032     0.040    0.771       0.983       0.782
+
+start matching (+-5 min) and where volunteer starts fall:
+                         vol_in_aic@5m  aic_in_vol@5m  start_near_start  start_inside  start_outside
+region                                                                                              
+Zakarpatska oblast                 NaN            NaN               NaN           NaN            NaN
+Lvivska oblast                   0.088          0.588             0.088         0.027          0.885
+Ternopilska oblast               0.529          0.214             0.529         0.471          0.000
+Donetska oblast                  0.130          0.183             0.130         0.870          0.000
+Volynska oblast                  0.188          0.355             0.188         0.274          0.538
+Chernihivska oblast              0.201          0.162             0.201         0.799          0.000
+Zaporizka oblast                 0.274          0.319             0.274         0.721          0.005
+Sumska oblast                    0.153          0.146             0.153         0.847          0.000
+Kyiv City                        0.410          0.253             0.410         0.500          0.090
+Kyivska oblast                   0.144          0.232             0.144         0.843          0.013
+Dnipropetrovska oblast           0.005          0.300             0.005         0.995          0.000
+Khersonska oblast                0.444          0.188             0.444         0.333          0.222
+Odeska oblast                    0.220          0.165             0.220         0.772          0.008
+Kharkivska oblast                0.000          0.000             0.000         1.000          0.000
+Zhytomyrska oblast               0.259          0.193             0.259         0.735          0.006
+Poltavska oblast                 0.197          0.166             0.197         0.803          0.000
+Khmelnytska oblast               0.544          0.304             0.544         0.456          0.000
+Cherkaska oblast                 0.254          0.164             0.254         0.746          0.000
+Kirovohradska oblast             0.173          0.147             0.173         0.822          0.005
+Ivano-Frankivska oblast          0.571          0.286             0.571         0.429          0.000
+Vinnytska oblast                 0.185          0.165             0.185         0.815          0.000
+Rivnenska oblast                 0.506          0.358             0.506         0.483          0.011
+Mykolaivska oblast               0.310          0.337             0.310         0.690          0.000
+Chernivetska oblast              0.700          0.656             0.700         0.300          0.000
+
+last alert start per source:
+                                   last_vol_start                   last_aic_start
+region                                                                            
+Zakarpatska oblast                            NaT 2026-09-17 10:23:08.644000+00:00
+Lvivska oblast          2026-10-10 04:19:34+00:00 2026-10-11 07:47:19.261000+00:00
+Ternopilska oblast      2026-10-10 02:24:29+00:00 2026-10-11 07:35:16.162000+00:00
+Donetska oblast         2026-10-09 19:17:40+00:00 2026-10-10 16:20:03.985000+00:00
+Volynska oblast         2026-10-10 02:46:54+00:00 2026-10-10 21:49:59.598000+00:00
+Chernihivska oblast     2026-10-10 04:27:16+00:00 2026-10-11 07:08:18.480000+00:00
+Zaporizka oblast        2026-10-10 01:04:07+00:00 2026-10-11 07:01:10.111000+00:00
+Sumska oblast           2026-10-09 23:31:07+00:00 2026-10-11 08:19:09.041000+00:00
+Kyiv City               2026-10-10 03:24:32+00:00 2026-10-11 08:06:36.928000+00:00
+Kyivska oblast          2026-10-10 04:45:40+00:00 2026-10-11 08:05:30.618000+00:00
+Dnipropetrovska oblast  2026-10-10 04:01:15+00:00        2026-10-11 08:17:27+00:00
+Khersonska oblast       2026-10-09 14:47:27+00:00 2026-10-11 07:41:44.908000+00:00
+Odeska oblast           2026-10-09 22:55:08+00:00 2026-10-11 07:35:48.327000+00:00
+Kharkivska oblast       2026-10-10 02:05:06+00:00 2026-10-11 07:36:28.966000+00:00
+Zhytomyrska oblast      2026-10-10 04:37:12+00:00 2026-10-11 05:16:28.746000+00:00
+Poltavska oblast        2026-10-10 02:43:03+00:00 2026-10-11 07:28:11.015000+00:00
+Khmelnytska oblast      2026-10-10 02:08:28+00:00 2026-10-11 07:32:07.873000+00:00
+Cherkaska oblast        2026-10-10 00:05:26+00:00 2026-10-11 08:23:17.852000+00:00
+Kirovohradska oblast    2026-10-10 04:47:44+00:00 2026-10-11 07:34:36.328000+00:00
+Ivano-Frankivska oblast 2026-10-09 18:00:46+00:00 2026-10-10 18:38:17.242000+00:00
+Vinnytska oblast        2026-10-10 03:31:17+00:00 2026-10-11 08:14:48.606000+00:00
+Rivnenska oblast        2026-10-10 03:59:00+00:00 2026-10-11 07:47:19.010000+00:00
+Mykolaivska oblast      2026-10-10 04:39:36+00:00 2026-10-11 07:52:08.654000+00:00
+Chernivetska oblast     2026-10-10 03:39:29+00:00 2026-10-10 18:25:32.977000+00:00
+
+mean over regions: time_vol 0.128, time_aic 0.431, jaccard 0.262, P(aic|vol) 0.820, P(vol|aic) 0.311
+
+==========================================================================================
+PART 4 - volunteer naive (invented-end) alerts vs alerts.in.ua
+==========================================================================================
+ref_minutes = time from the volunteer start to the end of the alerts.in.ua episode
+that contains it or starts within +-5 min of it (same measure for naive and normal alerts).
+
+volunteer alerts in window: 4380, naive: 329 (0.075)
+share with an alerts.in.ua episode found: {False: 0.96, True: 0.854}
+
+ref_minutes by naive flag (found only):
+        count    mean      std  min   10%   25%   50%     75%      90%      max
+naive                                                                          
+False  3889.0  5418.9  10501.5  0.0   9.4  20.3  53.9  3691.4  24415.9  43120.9
+True    281.0   438.5   2193.7  0.7  10.8  19.4  47.8   229.7    807.6  27711.6
+
+normal alerts: volunteer duration vs ref_minutes, median 16.5 vs 53.9; share where |difference| <= 2 min: 0.358
+
+naive share by region (window):
+                         size   mean
+region                              
+Kharkivska oblast         555  0.002
+Kyivska oblast            381  0.003
+Dnipropetrovska oblast    579  0.003
+Mykolaivska oblast        410  0.005
+Sumska oblast             249  0.020
+Lvivska oblast            113  0.027
+Chernivetska oblast        30  0.033
+Zaporizka oblast          190  0.037
+Kirovohradska oblast      208  0.048
+Odeska oblast             254  0.063
+Poltavska oblast          203  0.069
+Vinnytska oblast          124  0.089
+Volynska oblast           117  0.103
+Chernihivska oblast       149  0.107
+Zhytomyrska oblast        166  0.133
+Ivano-Frankivska oblast     7  0.143
+Rivnenska oblast           87  0.230
+Cherkaska oblast          142  0.268
+Kyiv City                 134  0.284
+Khmelnytska oblast         57  0.368
+Khersonska oblast         108  0.370
+Donetska oblast           100  0.400
+Ternopilska oblast         17  0.471
+
+==========================================================================================
+PART 5 - alerts.in.ua alerts that started before the window
+==========================================================================================
+window start: 2026-09-11 08:22:01+00:00; alerts that started earlier: 56
+name                    location_type  alert_type        
+Chernihivska oblast     raion          air_raid              4
+Dnipropetrovska oblast  city           air_raid              2
+                                       artillery_shelling    1
+                        hromada        air_raid              2
+                                       artillery_shelling    3
+                        raion          air_raid              7
+Donetska oblast         raion          air_raid              8
+Kharkivska oblast       city           air_raid              1
+                        hromada        air_raid              2
+                                       artillery_shelling    2
+                                       urban_fights          1
+                        raion          air_raid              7
+Kirovohradska oblast    city           air_raid              1
+                        hromada        air_raid              1
+                        raion          air_raid              1
+Mykolaivska oblast      raion          air_raid              1
+Odeska oblast           raion          air_raid              1
+Poltavska oblast        raion          air_raid              1
+Sumska oblast           raion          air_raid              3
+Zaporizka oblast        city           air_raid              1
+                        hromada        air_raid              1
+                        raion          air_raid              5
+
+oldest 10:
+[REDACTED 2026-10-11: 11 lines with raw alerts.in.ua records (location, type, start, status) removed before committing, per alerts.in.ua terms of use section 9.2. Summary kept in NOTES.md (Step 7b facts).]
