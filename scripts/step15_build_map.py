@@ -191,7 +191,7 @@ input[type=range]{width:100%}
         <pattern id="hatch-nd" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="var(--nodata)"/><line x1="0" y1="0" x2="0" y2="6" stroke="var(--line)" stroke-width="2"/></pattern>
         <pattern id="hatch-ex" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="var(--p3)"/><line x1="0" y1="0" x2="0" y2="6" stroke="var(--p4)" stroke-width="3"/></pattern>
       </defs>
-      <g id="raions">__SHAPES__</g><g>__BORDERS__</g><g>__LABELS__</g></svg></div>
+      <g id="raions">__SHAPES__</g><g>__BORDERS__</g></svg></div>
     <div class="side">
       <div class="box"><div class="k" id="legend-title">Chance of being under alert (redder = higher)</div>
         <div class="legend" style="display:block;height:12px;background:linear-gradient(to right,var(--p0),var(--p2),var(--p4))"></div>
