@@ -17,6 +17,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 RESULT_CHARS = 400
 FULL = "--full" in sys.argv          # every tool call and its output in full
+MESSAGES_ONLY = "--messages" in sys.argv   # only the user and assistant messages
 
 
 def secrets():
@@ -51,7 +52,7 @@ def main(src, dst):
     out = ["# Conversation log - Air alerts forecast (KSE Agentic AI School, Stage 2)", "",
            "Exported from the Claude Code session transcript. Screenshots and images are omitted; the API token "
            "and its fragment are replaced by [REDACTED]. Tool calls are summarised in one line with a short "
-           "excerpt of the result.", ""]
+           "excerpt of the result (omitted in --messages mode).", ""]
     n_user = n_asst = n_img = 0
     for line in open(src, encoding="utf-8"):
         try:
@@ -77,6 +78,8 @@ def main(src, dst):
                 else:
                     n_asst += 1
                     out.append(f"**Assistant:**\n\n{txt}\n")
+            elif t in ("tool_use", "tool_result") and MESSAGES_ONLY:
+                continue
             elif t == "tool_use":
                 inp = b.get("input", {})
                 if FULL:
@@ -107,5 +110,5 @@ def main(src, dst):
 
 
 if __name__ == "__main__":
-    args = [a for a in sys.argv[1:] if a != "--full"]
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
     main(args[0], args[1])
