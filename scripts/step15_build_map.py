@@ -1,6 +1,7 @@
 """Step 15: build the raion map page (docs/map.html) from the committed live forecast and the final-test replay.
 
-Main view: live forecast for +1 h / +6 h / +24 h (forecasts/horizons_<latest>.csv/.json, step17, D44). Replay: for
+Main view: live forecast of the final hour-by-hour model, +1...+24 h (forecasts/final_<latest>.csv/.json, step22,
+D47). Also writes a self-contained copy for GitHub Pages: map/index.html. Replay: for
 each of the 22 post-reform test days, the B3 forecast made at 06:00 Kyiv time (the tested model) and the alerts
 that actually happened in the next 24 h.
 Shapes: HDX COD-AB adm2 (raions) and adm1 (oblast borders), projected and simplified here; plain SVG, no
@@ -28,6 +29,7 @@ from aaf.evaluate import combined_history  # noqa: E402
 
 GEO = config.ROOT / "data" / "raw" / "hdx" / "ukr_admin_boundaries.geojson.zip"
 OUT = config.ROOT / "docs" / "map.html"
+OUT_PAGES = config.ROOT / "map" / "index.html"
 W = 1000.0
 LAT0 = 48.5
 
@@ -67,11 +69,9 @@ def path(geom, proj, tol=0.6):
 
 
 def main():
-    fc_csv = sorted(p for p in (config.ROOT / "forecasts").glob("horizons_*.csv") if not p.stem.endswith("_b6"))[-1]
+    fc_csv = sorted((config.ROOT / "forecasts").glob("final_*.csv"))[-1]
     meta = json.loads(fc_csv.with_suffix(".json").read_text())
     fc = pd.read_csv(fc_csv)
-    b6_csv = sorted((config.ROOT / "forecasts").glob("horizons_*_b6.csv"))   # optional experimental layer (D46)
-    fc = fc.merge(pd.read_csv(b6_csv[-1]), on="unit", how="left") if b6_csv else fc.assign(b6_6h=np.nan, b6_12h=np.nan, b6_24h=np.nan)
     with zipfile.ZipFile(GEO) as z:
         adm2 = json.load(io.TextIOWrapper(z.open("ukr_admin2.geojson"), encoding="utf-8"))["features"]
         adm1 = json.load(io.TextIOWrapper(z.open("ukr_admin1.geojson"), encoding="utf-8"))["features"]
@@ -92,8 +92,8 @@ def main():
         replay["units"][r["hdx_pcode"]] = {"p": np.round(p, 3).tolist(), "a": np.round(actual, 3).tolist()}
     adm2_obl = {f["properties"]["adm2_pcode"]: f["properties"]["adm1_pcode"] for f in adm2}
 
-    info = {r["hdx_pcode"]: {"name": r["raion_uk"] if isinstance(r["raion_uk"], str) else "Київ", "p": [round(float(r[c]), 3) for c in ("p_1h", "p_6h", "p_12h", "p_24h")],
-                             "q": [round(float(r[c]), 3) if pd.notna(r[c]) else None for c in ("p_1h", "b6_6h", "b6_12h", "b6_24h")],
+    info = {r["hdx_pcode"]: {"name": r["raion_uk"] if isinstance(r["raion_uk"], str) else "Київ", "p": [round(float(r[f"p_{h}h"]), 3) if pd.notna(r[f"p_{h}h"]) else None for h in range(1, 25)],
+                             "now": int(r["alert_now"]) if pd.notna(r["alert_now"]) else 0,
                              "ex": bool(r["excluded"]), "obl": r["unit"].split(" / ")[0], "op": adm2_obl[r["hdx_pcode"]]}
             for _, r in fc.iterrows()}
     obl = {}
@@ -106,8 +106,6 @@ def main():
         o = {"name": f["properties"]["adm1_name1"], "n": len(mods), "n_all": n_all}
         if mods:
             o["p"] = np.round(np.mean([info[pc]["p"] for pc in mods], axis=0), 3).tolist()
-            if all(None not in info[pc]["q"] for pc in mods):
-                o["q"] = np.round(np.mean([info[pc]["q"] for pc in mods], axis=0), 3).tolist()
             o["rp"] = np.round(np.mean([replay["units"][pc]["p"] for pc in mods], axis=0), 3).tolist()
             o["ra"] = np.round(np.mean([replay["units"][pc]["a"] for pc in mods], axis=0), 3).tolist()
             o["rhit"] = [int(sum(replay["units"][pc]["a"][d] > 0 for pc in mods)) for d in range(len(days))]
@@ -129,11 +127,19 @@ def main():
     bd = [path(f["geometry"], proj, 0.9) for f in adm1]
     # light halo under a dark line: visible on white (low) raions, on burgundy (high) raions and on the background
     borders = "".join(f'<path class="obh" d="{d}"/>' for d in bd) + "".join(f'<path class="ob" d="{d}"/>' for d in bd)
-    mix = {m["unit_name"]: m for m in meta["observed_last_7_days_by_oblast"]}
+    mix = {m["unit_name"]: m for m in meta.get("observed_last_7_days_by_oblast", [])}
     page = TEMPLATE.replace("__H__", f"{height:.0f}").replace("__SHAPES__", "".join(shapes)).replace("__BORDERS__", borders).replace("__LABELS__", labels)
     page = page.replace("__DATA__", json.dumps({"info": info, "obl": obl, "replay": replay, "meta": meta, "mix": mix}, ensure_ascii=False))
     OUT.parent.mkdir(exist_ok=True)
     OUT.write_text(page, encoding="utf-8")
+    # GitHub Pages copy: a full document, system fonts only (no external requests)
+    OUT_PAGES.parent.mkdir(exist_ok=True)
+    head = '<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n'
+    body = page.split("<style>", 1)
+    title = body[0].replace('<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400&display=swap">', "")
+    css, rest = body[1].split("</style>", 1)
+    OUT_PAGES.write_text(head + title.strip() + "\n<style>\nbody{margin:0}[hidden]{display:none!important}\n" + css + "</style>\n</head>\n<body>\n" + rest + "\n</body>\n</html>\n", encoding="utf-8")
+    print(f"saved -> {OUT_PAGES.relative_to(config.ROOT)} ({OUT_PAGES.stat().st_size/1e6:.2f} MB)")
     print(f"saved -> {OUT.relative_to(config.ROOT)} ({OUT.stat().st_size/1e6:.2f} MB); raion shapes {len(shapes)}; forecast file {fc_csv.name}")
 
 
@@ -194,15 +200,10 @@ input[type=range]{width:100%}
     <button id="tab-replay" aria-pressed="false">Replay: test days</button>
   </div>
   <div class="box future" id="hz-tabs">
-    <label class="k" for="hz">Forecast: chance of an alert in</label>
-    <input type="range" id="hz" min="0" max="3" step="1" value="0" aria-valuetext="1 hour">
-    <div class="ticks hzt"><span>1 hour</span><span>6 hours</span><span>12 hours</span><span>24 hours</span></div>
+    <label class="k" for="hz">Forecast: chance of an alert in the next hours</label>
+    <input type="range" id="hz" min="0" max="23" step="1" value="0" aria-valuetext="+1 hour">
+    <div class="ticks hzt"><span>+1 h</span><span>+6 h</span><span>+12 h</span><span>+18 h</span><span>+24 h</span></div>
     <div class="v" id="hz-label"></div>
-    <div class="tabs" role="group" aria-label="Model" id="model-tabs">
-      <button id="mdl-b4" aria-pressed="true">Main model</button>
-      <button id="mdl-b6" aria-pressed="false">Experimental: with hour of day</button>
-    </div>
-    <p class="note" id="mdl-note"></p>
   </div>
   <div class="tabs" role="group" aria-label="Level">
     <button id="lvl-raion" aria-pressed="true">Raions</button>
@@ -230,7 +231,7 @@ input[type=range]{width:100%}
       <div class="box warn"><p class="note">Research project, not a warning system. Always follow official air-raid alerts. Probabilities refer to announced alerts, not to attacks.</p></div>
     </div>
   </div>
-  <p class="note">Forecast = chance that the raion is under an announced alert at that exact moment. +1 hour: calibrated persistence (B2) - mostly "is an alert running now, and how long do they last here". +6, +12 and +24 hours: exponentially weighted share of time under alert (B4, half-life 7 days: a day a week ago counts half). Each was the best for its horizon on the validation folds (May-July 2026); B4 is <b>not yet tested on held-out data</b>. The hour of day is not used: a version with the night/day pattern (more time under alert 22:00-05:00) had a slightly lower average error on validation but less reliable probabilities, so by our pre-set rule it was not adopted. The replay shows B3 (7-day share), the model that was tested once on the 22 post-reform days (best of four, macro Brier 0.126). Shapes: HDX COD-AB (Kartographia, CC BY-IGO). Alerts: official dataset (Vadimkin, from the official Telegram channel) and alerts.in.ua.</p>
+  <p class="note">Forecast = chance that the raion is under an announced air-raid alert at that exact hour. Final model: log-odds(chance) = log-odds(raion's recent level, a week ago counts half) + hour-of-day shift (one national pattern, recent month weighted most) + effect of an alert running now (strong for the next hours, fading). Checked day by day on 2026 (each day learns only from earlier days): 0.9% lower error than a flat level [0.6%, 1.3%]; the gain is in the first ~6 hours; on the most recent weeks there is no evidence of a difference. The replay shows B3 (7-day share), the model tested once on the 22 post-reform days. Shapes: HDX COD-AB (Kartographia, CC BY-IGO). Alerts: official dataset (Vadimkin, from the official Telegram channel) and alerts.in.ua.</p>
 </div>
 <div id="tip" hidden></div>
 <script>
@@ -244,12 +245,12 @@ const pct = p => (100 * p).toFixed(0) + "%";
 const paths = [...document.querySelectorAll(".r.m")];
 const m = DATA.meta;
 const sub = () => document.getElementById("sub").textContent = mode === "live"
-  ? "Data up to " + kyiv(m.data_up_to_utc) + " Kyiv time. Chance of an alert at " + kyiv(m.target_times_utc[HZ[hz]]) + " (" + HZ[hz] + ")."
+  ? "Data up to " + kyiv(m.data_up_to_utc) + " Kyiv time. Chance of an alert at " + kyiv(m.target_times_utc[hz]) + " (" + HZ[hz] + ")."
   : "Replay of the 22 post-reform test days: B3 forecast at 06:00 Kyiv vs what happened in the next 24 h.";
 document.getElementById("meta").innerHTML = "data up to: " + kyiv(m.data_up_to_utc) + "<br>forecast made: " + kyiv(m.forecast_made_utc) + "<br>raions forecast: " + m.modeled_units + "<br>code commit: " + m.code_commit_before_forecast;
-let mode = "live", day = 0, level = "raion", hz = 0, model = "B4";
-const val = (o) => (model === "B6" && o.q && o.q[hz] != null) ? o.q[hz] : o.p[hz];
-const HZ = ["+1h", "+6h", "+12h", "+24h"];
+let mode = "live", day = 0, level = "raion", hz = 0;
+const val = (o) => o.p[hz];
+const HZ = Array.from({length: 24}, (_, k) => "+" + (k + 1) + "h");
 const svg = document.querySelector(".map svg");
 function draw() {
   let hits = 0, sumP = 0, sumA = 0, n = 0;
@@ -261,10 +262,7 @@ function draw() {
     el.style.fill = col(p); el.classList.toggle("hit", hit);
   }
   sub();
-  document.getElementById("hz-label").textContent = "at " + kyiv(m.target_times_utc[HZ[hz]]) + " Kyiv time · model: " + (hz === 0 ? "B2 (persistence)" : model === "B6" ? "B6 (weighted share + hour of day) - experimental" : "B4 (weighted share, half-life 7 days)");
-  document.getElementById("mdl-note").textContent = model === "B6"
-    ? "Experimental: adds the post-reform hour-of-day pattern (more alert time 09-11 h, less at 01 h and 13-14 h). Checked on only 4 post-reform days: no clear improvement, so it is not the main model. +1 hour is the same in both."
-    : "Main model: the same value for 6, 12 and 24 hours, because the hour-of-day effect did not pass our reliability checks.";
+  document.getElementById("hz-label").textContent = HZ[hz] + " = " + kyiv(m.target_times_utc[hz]) + " Kyiv time";
   document.getElementById("hz-tabs").hidden = mode !== "live";
   document.getElementById("hit-note").hidden = mode !== "replay";
   document.getElementById("replay-box").hidden = mode !== "replay";
@@ -280,10 +278,8 @@ for (const [id, lv] of [["lvl-raion", "raion"], ["lvl-oblast", "oblast"]]) {
 for (const [id, md] of [["tab-live", "live"], ["tab-replay", "replay"]]) {
   document.getElementById(id).addEventListener("click", () => { mode = md; for (const b of document.querySelectorAll('[aria-label="View"] button')) b.setAttribute("aria-pressed", String(b.id === id)); draw(); });
 }
-const HZTXT = ["1 hour", "6 hours", "12 hours", "24 hours"];
+const HZTXT = HZ.map(h => h.replace("h", " hours").replace("+1 hours", "+1 hour"));
 document.getElementById("hz").addEventListener("input", e => { hz = +e.target.value; e.target.setAttribute("aria-valuetext", HZTXT[hz]); draw(); });
-for (const [id, md] of [["mdl-b4", "B4"], ["mdl-b6", "B6"]]) document.getElementById(id).addEventListener("click", () => { model = md;
-  for (const b of document.querySelectorAll('[aria-label="Model"] button')) b.setAttribute("aria-pressed", String(b.id === id)); draw(); });
 document.getElementById("day").addEventListener("input", e => { day = +e.target.value; draw(); });
 const tip = document.getElementById("tip");
 document.getElementById("raions").addEventListener("mousemove", e => {
@@ -300,7 +296,7 @@ document.getElementById("raions").addEventListener("mousemove", e => {
   }
   if (el.classList.contains("nd")) txt += "<br>no data";
   else if (i && i.ex) txt += "<br>near-permanent alert, not forecast";
-  else if (mode === "live") txt += "<br>chance of alert at " + HZ[hz] + ": <b>" + pct(val(i)) + "</b>" + (model === "B6" ? " (experimental)" : "");
+  else if (mode === "live") txt += "<br>chance of alert at " + kyiv(m.target_times_utc[hz]) + ": <b>" + pct(val(i)) + "</b>" + (i.now ? "<br>alert running at the data time" : "");
   else { const r = DATA.replay.units[pc]; txt += "<br>forecast " + pct(r.p[day]) + " · actual " + pct(r.a[day]) + " of the next 24 h"; }
   tip.innerHTML = txt; tip.hidden = false; tip.style.left = (e.clientX + 14) + "px"; tip.style.top = (e.clientY + 14) + "px";
   const mx = i && DATA.mix[i.obl];

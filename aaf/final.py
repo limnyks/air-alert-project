@@ -35,17 +35,17 @@ def combined(off, live, since):
     return History(np.concatenate([s1, s2]).astype(np.int64), np.concatenate([e1, e2]).astype(np.int64))
 
 
-def build_panel():
+def build_panel(snap=SNAP):
     import sys
     sys.path.insert(0, str(config.ROOT / "scripts"))
     from step19_b6_postreform import live_histories          # step17 rules for the live snapshot
     from step14_live_forecast import LIVE
 
-    T = int(pd.to_datetime(SNAP, format="%Y%m%dT%H%M%SZ").as_unit("ns").value)
+    T = int(pd.to_datetime(snap, format="%Y%m%dT%H%M%SZ").as_unit("ns").value)
     since = T - 30 * DAY
     units = load_units()["unit"].tolist()
     off = load_histories("official", units)
-    live = live_histories(LIVE / SNAP, T)
+    live = live_histories(LIVE / snap, T)
     hist = {u: combined(off[u], live[u], since) for u in units}
 
     g0 = (ns(config.OFFICIAL_START) // H + 1) * H
