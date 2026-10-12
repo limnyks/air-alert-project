@@ -6,7 +6,8 @@
   Fails if either is still present in the output.
 
 Usage (from the project root):
-    python scripts/export_conversation.py <path/to/session.jsonl> logs/conversation_log.md
+    python scripts/export_conversation.py <path/to/session.jsonl> logs/conversation_log.md             (readable)
+    python scripts/export_conversation.py <path/to/session.jsonl> logs/conversation_log_full.md --full (everything in full)
 """
 import json
 import re
@@ -15,6 +16,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 RESULT_CHARS = 400
+FULL = "--full" in sys.argv          # every tool call and its output in full
 
 
 def secrets():
@@ -77,15 +79,22 @@ def main(src, dst):
                     out.append(f"**Assistant:**\n\n{txt}\n")
             elif t == "tool_use":
                 inp = b.get("input", {})
-                desc = inp.get("description") or inp.get("file_path") or inp.get("url") or inp.get("action") or ""
-                out.append(f"> tool `{b.get('name')}`: {str(desc)[:200]}\n")
+                if FULL:
+                    body = json.dumps(inp, ensure_ascii=False, indent=1).replace("```", "'''")
+                    out.append(f"**Tool call `{b.get('name')}`:**\n\n```\n{body}\n```\n")
+                else:
+                    desc = inp.get("description") or inp.get("file_path") or inp.get("url") or inp.get("action") or ""
+                    out.append(f"> tool `{b.get('name')}`: {str(desc)[:200]}\n")
             elif t == "tool_result":
                 c = b.get("content")
                 if isinstance(c, list):
                     n_img += sum(1 for x in c if x.get("type") == "image")
                     c = " ".join(x.get("text", "") for x in c if x.get("type") == "text")
                 c = clean(str(c or ""))
-                if c:
+                if c and FULL:
+                    body = c.replace("```", "'''")
+                    out.append(f"**Tool result:**\n\n```\n{body}\n```\n")
+                elif c:
                     ex = c[:RESULT_CHARS].replace("\n", " ")
                     out.append(f">   result: {ex}{' ...' if len(c) > RESULT_CHARS else ''}\n")
     text = redact("\n".join(out), secs)
@@ -98,4 +107,5 @@ def main(src, dst):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1], sys.argv[2])
+    args = [a for a in sys.argv[1:] if a != "--full"]
+    main(args[0], args[1])
