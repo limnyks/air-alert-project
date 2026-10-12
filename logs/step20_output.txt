@@ -1,0 +1,6 @@
+data up to 2026-10-12 15:00:11+03:00; made 15:47 Kyiv; raions 110
+      b6_6h  b6_12h  b6_24h
+mean  0.263   0.265   0.251
+50%   0.203   0.206   0.189
+max   0.926   0.928   0.920
+saved -> forecasts/horizons_20261012T120011Z_b6.csv

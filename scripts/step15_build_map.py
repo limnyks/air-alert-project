@@ -67,9 +67,11 @@ def path(geom, proj, tol=0.6):
 
 
 def main():
-    fc_csv = sorted((config.ROOT / "forecasts").glob("horizons_*.csv"))[-1]
+    fc_csv = sorted(p for p in (config.ROOT / "forecasts").glob("horizons_*.csv") if not p.stem.endswith("_b6"))[-1]
     meta = json.loads(fc_csv.with_suffix(".json").read_text())
     fc = pd.read_csv(fc_csv)
+    b6_csv = sorted((config.ROOT / "forecasts").glob("horizons_*_b6.csv"))   # optional experimental layer (D46)
+    fc = fc.merge(pd.read_csv(b6_csv[-1]), on="unit", how="left") if b6_csv else fc.assign(b6_6h=np.nan, b6_12h=np.nan, b6_24h=np.nan)
     with zipfile.ZipFile(GEO) as z:
         adm2 = json.load(io.TextIOWrapper(z.open("ukr_admin2.geojson"), encoding="utf-8"))["features"]
         adm1 = json.load(io.TextIOWrapper(z.open("ukr_admin1.geojson"), encoding="utf-8"))["features"]
@@ -91,6 +93,7 @@ def main():
     adm2_obl = {f["properties"]["adm2_pcode"]: f["properties"]["adm1_pcode"] for f in adm2}
 
     info = {r["hdx_pcode"]: {"name": r["raion_uk"] if isinstance(r["raion_uk"], str) else "Київ", "p": [round(float(r[c]), 3) for c in ("p_1h", "p_6h", "p_12h", "p_24h")],
+                             "q": [round(float(r[c]), 3) if pd.notna(r[c]) else None for c in ("p_1h", "b6_6h", "b6_12h", "b6_24h")],
                              "ex": bool(r["excluded"]), "obl": r["unit"].split(" / ")[0], "op": adm2_obl[r["hdx_pcode"]]}
             for _, r in fc.iterrows()}
     obl = {}
@@ -103,6 +106,8 @@ def main():
         o = {"name": f["properties"]["adm1_name1"], "n": len(mods), "n_all": n_all}
         if mods:
             o["p"] = np.round(np.mean([info[pc]["p"] for pc in mods], axis=0), 3).tolist()
+            if all(None not in info[pc]["q"] for pc in mods):
+                o["q"] = np.round(np.mean([info[pc]["q"] for pc in mods], axis=0), 3).tolist()
             o["rp"] = np.round(np.mean([replay["units"][pc]["p"] for pc in mods], axis=0), 3).tolist()
             o["ra"] = np.round(np.mean([replay["units"][pc]["a"] for pc in mods], axis=0), 3).tolist()
             o["rhit"] = [int(sum(replay["units"][pc]["a"][d] > 0 for pc in mods)) for d in range(len(days))]
@@ -193,6 +198,11 @@ input[type=range]{width:100%}
     <input type="range" id="hz" min="0" max="3" step="1" value="0" aria-valuetext="1 hour">
     <div class="ticks hzt"><span>1 hour</span><span>6 hours</span><span>12 hours</span><span>24 hours</span></div>
     <div class="v" id="hz-label"></div>
+    <div class="tabs" role="group" aria-label="Model" id="model-tabs">
+      <button id="mdl-b4" aria-pressed="true">Main model</button>
+      <button id="mdl-b6" aria-pressed="false">Experimental: with hour of day</button>
+    </div>
+    <p class="note" id="mdl-note"></p>
   </div>
   <div class="tabs" role="group" aria-label="Level">
     <button id="lvl-raion" aria-pressed="true">Raions</button>
@@ -237,20 +247,24 @@ const sub = () => document.getElementById("sub").textContent = mode === "live"
   ? "Data up to " + kyiv(m.data_up_to_utc) + " Kyiv time. Chance of an alert at " + kyiv(m.target_times_utc[HZ[hz]]) + " (" + HZ[hz] + ")."
   : "Replay of the 22 post-reform test days: B3 forecast at 06:00 Kyiv vs what happened in the next 24 h.";
 document.getElementById("meta").innerHTML = "data up to: " + kyiv(m.data_up_to_utc) + "<br>forecast made: " + kyiv(m.forecast_made_utc) + "<br>raions forecast: " + m.modeled_units + "<br>code commit: " + m.code_commit_before_forecast;
-let mode = "live", day = 0, level = "raion", hz = 0;
+let mode = "live", day = 0, level = "raion", hz = 0, model = "B4";
+const val = (o) => (model === "B6" && o.q && o.q[hz] != null) ? o.q[hz] : o.p[hz];
 const HZ = ["+1h", "+6h", "+12h", "+24h"];
 const svg = document.querySelector(".map svg");
 function draw() {
   let hits = 0, sumP = 0, sumA = 0, n = 0;
   for (const el of paths) {
     const pc = el.dataset.pc, i = DATA.info[pc];
-    let p = i.p[hz], hit = false;
+    let p = val(i), hit = false;
     if (mode === "replay") { const r = DATA.replay.units[pc]; p = r.p[day]; hit = r.a[day] > 0; sumP += p; sumA += r.a[day]; n++; if (hit) hits++; }
-    if (level === "oblast") { const o = DATA.obl[i.op]; p = mode === "replay" ? o.rp[day] : o.p[hz]; hit = false; }
+    if (level === "oblast") { const o = DATA.obl[i.op]; p = mode === "replay" ? o.rp[day] : val(o); hit = false; }
     el.style.fill = col(p); el.classList.toggle("hit", hit);
   }
   sub();
-  document.getElementById("hz-label").textContent = "at " + kyiv(m.target_times_utc[HZ[hz]]) + " Kyiv time · model: " + (hz === 0 ? "B2 (persistence)" : "B4 (weighted share, half-life 7 days)");
+  document.getElementById("hz-label").textContent = "at " + kyiv(m.target_times_utc[HZ[hz]]) + " Kyiv time · model: " + (hz === 0 ? "B2 (persistence)" : model === "B6" ? "B6 (weighted share + hour of day) - experimental" : "B4 (weighted share, half-life 7 days)");
+  document.getElementById("mdl-note").textContent = model === "B6"
+    ? "Experimental: adds the post-reform hour-of-day pattern (more alert time 09-11 h, less at 01 h and 13-14 h). Checked on only 4 post-reform days: no clear improvement, so it is not the main model. +1 hour is the same in both."
+    : "Main model: the same value for 6, 12 and 24 hours, because the hour-of-day effect did not pass our reliability checks.";
   document.getElementById("hz-tabs").hidden = mode !== "live";
   document.getElementById("hit-note").hidden = mode !== "replay";
   document.getElementById("replay-box").hidden = mode !== "replay";
@@ -268,6 +282,8 @@ for (const [id, md] of [["tab-live", "live"], ["tab-replay", "replay"]]) {
 }
 const HZTXT = ["1 hour", "6 hours", "12 hours", "24 hours"];
 document.getElementById("hz").addEventListener("input", e => { hz = +e.target.value; e.target.setAttribute("aria-valuetext", HZTXT[hz]); draw(); });
+for (const [id, md] of [["mdl-b4", "B4"], ["mdl-b6", "B6"]]) document.getElementById(id).addEventListener("click", () => { model = md;
+  for (const b of document.querySelectorAll('[aria-label="Model"] button')) b.setAttribute("aria-pressed", String(b.id === id)); draw(); });
 document.getElementById("day").addEventListener("input", e => { day = +e.target.value; draw(); });
 const tip = document.getElementById("tip");
 document.getElementById("raions").addEventListener("mousemove", e => {
@@ -278,13 +294,13 @@ document.getElementById("raions").addEventListener("mousemove", e => {
   if (level === "oblast" && o) {
     txt = "<b>" + o.name + "</b>";
     if (!o.n) txt += "<br>all raions near-permanent alert";
-    else if (mode === "live") txt += "<br>average chance of alert at " + HZ[hz] + ": <b>" + pct(o.p[hz]) + "</b><br>(= expected share of its " + o.n + " forecast raions)";
+    else if (mode === "live") txt += "<br>average chance of alert at " + HZ[hz] + ": <b>" + pct(val(o)) + "</b><br>(= expected share of its " + o.n + " forecast raions)";
     else txt += "<br>forecast " + pct(o.rp[day]) + " · actual " + pct(o.ra[day]) + "<br>raions with an alert: " + o.rhit[day] + " of " + o.n;
     tip.innerHTML = txt; tip.hidden = false; tip.style.left = (e.clientX + 14) + "px"; tip.style.top = (e.clientY + 14) + "px"; return;
   }
   if (el.classList.contains("nd")) txt += "<br>no data";
   else if (i && i.ex) txt += "<br>near-permanent alert, not forecast";
-  else if (mode === "live") txt += "<br>chance of alert at " + HZ[hz] + ": <b>" + pct(i.p[hz]) + "</b>";
+  else if (mode === "live") txt += "<br>chance of alert at " + HZ[hz] + ": <b>" + pct(val(i)) + "</b>" + (model === "B6" ? " (experimental)" : "");
   else { const r = DATA.replay.units[pc]; txt += "<br>forecast " + pct(r.p[day]) + " · actual " + pct(r.a[day]) + " of the next 24 h"; }
   tip.innerHTML = txt; tip.hidden = false; tip.style.left = (e.clientX + 14) + "px"; tip.style.top = (e.clientY + 14) + "px";
   const mx = i && DATA.mix[i.obl];
