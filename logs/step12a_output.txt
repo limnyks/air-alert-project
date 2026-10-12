@@ -1,0 +1,52 @@
+[load_histories official] dropped 0 episodes starting after the snapshot cutoff, 1 zero-length episodes
+
+==========================================================================================
+FIX 1 - exclusion and training starts recomputed before 2026-05-18
+==========================================================================================
+units: 119; excluded now: 9 (Step 10b: 15); modeled now: 110
+exclusion changed for 6 units:
+                                  unit  share_last92_preval  excluded  excluded_step10b
+         Sumska oblast / Sumskyi raion                0.696     False              True
+  Zaporizka oblast / Berdianskyi raion                0.761     False              True
+Zaporizka oblast / Melitopolskyi raion                0.761     False              True
+  Zaporizka oblast / Polohivskyi raion                0.759     False              True
+  Zaporizka oblast / Vasylivskyi raion                0.761     False              True
+   Zaporizka oblast / Zaporizkyi raion                0.759     False              True
+
+training start changed for 17 units:
+                                          unit  ratio_preval train_from train_from_step10b
+      Ivano-Frankivska oblast / Kaluskyi raion         0.832 2022-03-15         2025-11-02
+   Ivano-Frankivska oblast / Kolomyiskyi raion         0.847 2022-03-15         2025-11-02
+     Ivano-Frankivska oblast / Kosivskyi raion         0.859 2022-03-15         2025-11-02
+Ivano-Frankivska oblast / Nadvirnianskyi raion         0.843 2022-03-15         2025-11-02
+ Ivano-Frankivska oblast / Verkhovynskyi raion         0.850 2022-03-15         2025-11-02
+          Kyivska oblast / Vyshhorodskyi raion         0.648 2025-11-04         2022-03-15
+       Lvivska oblast / Chervonohradskyi raion         0.779 2022-03-15         2025-11-02
+           Lvivska oblast / Drohobytskyi raion         0.757 2022-03-15         2025-11-02
+               Lvivska oblast / Lvivskyi raion         0.839 2022-03-15         2025-11-02
+             Lvivska oblast / Sambirskyi raion         0.741 2022-03-15         2025-11-02
+              Lvivska oblast / Stryiskyi raion         0.808 2022-03-15         2025-11-02
+            Lvivska oblast / Yavorivskyi raion         0.744 2022-03-15         2025-11-02
+           Lvivska oblast / Zolochivskyi raion         0.865 2022-03-15         2025-11-02
+         Poltavska oblast / Myrhorodskyi raion         0.630 2025-11-01         2022-03-15
+       Ternopilska oblast / Chortkivskyi raion         0.814 2022-03-15         2025-11-02
+       Ternopilska oblast / Kremenetskyi raion         0.810 2022-03-15         2025-11-02
+       Ternopilska oblast / Ternopilskyi raion         0.800 2022-03-15         2025-11-02
+
+now excluded: ['Dnipropetrovska oblast / Synelnykivskyi raion', 'Donetska oblast / Bakhmutskyi raion', 'Donetska oblast / Donetskyi raion', 'Donetska oblast / Horlivskyi raion', 'Donetska oblast / Kalmiuskyi raion', 'Donetska oblast / Kramatorskyi raion', 'Donetska oblast / Mariupolskyi raion', 'Donetska oblast / Pokrovskyi raion', 'Donetska oblast / Volnovaskyi raion']
+saved -> config/units_clean.csv
+
+==========================================================================================
+FIX 2 - possible outages of the official feed
+==========================================================================================
+days checked: 1638; days with no official alert at all: 3; of these with volunteer alerts (flagged as outage): 3
+       day  official_alerts  volunteer_alerts  outage
+2026-08-30                0               178    True
+2026-08-31                0               161    True
+2026-09-01                0               165    True
+saved -> config/outage_days.csv
+
+==========================================================================================
+LEAKAGE CHECK on real histories (honest forecaster)
+==========================================================================================
+units checked: 10, times: 20, problems: 0
