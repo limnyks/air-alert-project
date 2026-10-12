@@ -69,6 +69,7 @@ Updated at the end of every step, after the user approves the changes.
 | D35 | 2026-10-11 | **Definition of done.** Must-have: (1) evaluation harness incl. fixes D36, (2) baselines + best baseline recorded, (3) M0, (4) M1 Hawkes, (5) reform handling D34, (6) final test once (pre- and post-reform), (7) raion map (D9, D28, D30, D33), (8) README with RUN order, limitations, safety disclaimer, (9) ~100-word reflection, (10) redacted conversation log. Stretch: M2 (D32), M3, ML challenger, text (D25), prospective test, hromada drill-down, Kyiv map | — | Retrospective; user: "for now it is okay" (answers Q12) |
 | D36 | 2026-10-11 | **Retrospective fixes in 6a:** (1) recompute the 80 % saturation rule and the ×1.5 switch rule with official data before 2026-05-18 only (the Step 10b versions used data up to 2026-09-07 and the adaptation week, overlapping validation and tests) — if unchanged, document; if changed, use the clean versions; (2) outage detection: UTC days with no official alert anywhere while the volunteer file has alerts are flagged and excluded from fitting and scoring. **Token:** before publishing, redact the token and its 8-character fragment from every published file, exclude the email screenshot from the log, and request a new token | — | Retrospective review; user accepted |
 | D37 | 2026-10-12 | **Clean units and outage mask (D36 results).** (1) Units from `config/units_clean.csv` (rules on official data before 2026-05-18): **9 excluded** (8 Donetska raions + Synelnykivskyi) → **110 modeled units**; Sumskyi and 5 Zaporizka raions re-included (pre-validation shares 0.696–0.761 < 0.80; they exceeded 0.80 only in summer, i.e. in test-window data); training starts changed for 17 units. (2) Outage period **2026-08-29 00:00 → 2026-09-03 00:00 UTC** excluded from fitting and scoring (`config/outage_periods.csv`); pre-reform test origins shrink from 56 to 51 days | — | Step 12a output; D36 says use the clean versions if they change |
+| D38 | 2026-10-12 | **Protocol amendment (metrics), made BEFORE any test result exists: no model or baseline has been scored on the test windows (pre-reform 2026-07-13 → 09-07, post-reform 2026-09-18 → 10-11); the code guard blocks reading their labels outside final-test mode.** (Aggregate descriptive statistics of the test period seen in Steps 8b/10b remain documented in 12.9.) Changes: (1) primary skill = 1 − macroBrier(model) / macroBrier(best baseline): Brier averaged per unit, then over units, then one ratio (replaces the mean of per-unit ratios, which explodes for units with near-zero baseline Brier); micro skill reported next to it; per-unit skill descriptive only; (2) skill reported per horizon (+1 … +24 h); (3) bootstrap resamples the same days for all units and for model and baseline (now covered by a test); week-block bootstrap (7 days) added as sensitivity — if it changes a conclusion, report the more cautious one; (4) wording rules (section 12.10); (5) the best baseline is chosen on the validation folds and saved to a file with date and commit before any model is fitted (6c) | Mean of per-unit ratios (old) / ratio of macro Brier (new) | User review: per-unit ratios add noise from quiet raions; same-day resampling must be guaranteed; short test needs careful wording |
 
 **Evaluation (D10/D11, to be frozen before modeling):** proper scoring rules (log-likelihood, Brier) with walk-forward windows; time-rescaling theorem goodness-of-fit (rescaled inter-arrival times ~ Exp(1), KS test); calibration; significance of score differences across windows; durations: log-score and CRPS with censoring.
 **Implementation caveat:** unverified whether a ready Hawkes library works on our Python/Mac; fallback is our own likelihood with scipy, or an hourly logistic model whose inputs are the Hawkes kernel sums (discretized version of the same process).
@@ -299,6 +300,7 @@ Answered: A → D4, B → D5 + D8, C → D6, D → D7, Q1 → deadline not relev
 | 11 | Exploratory tests H1, H2, H4, H3 (data before validation) | `scripts/step11_explore_hypotheses.py` → `logs/step11_output.txt` | H1 confirmed and refined (trough 05–07, peaks midday and 21:00); H2 "not one shape"; H4 suggestive but test needs fixing (M8); H3 blocked by empty HDX line codes (M9) |
 | 11b | Neighbours from HDX shapes; exact calibrated clustering test; H3 rerun | `scripts/step11b_neighbours_and_clustering.py` → `logs/step11b_output.txt` | 256 neighbour pairs; H4 confirmed (test validated on simulated data: 0/10 false rejections); H3 confirmed: simultaneous joint alerts + cross-oblast spreading → D32 |
 | 12a | Stage 6a: harness (history firewall, targets, guard, leakage test), D36 fixes | `aaf/`, `tests/`, `scripts/step12a_harness_checks.py` → `logs/step12a_output.txt` | 10 tests OK; clean units 110 (D37); outage 29 Aug–2 Sep masked; real-data leakage check 0 problems; M10 fixed |
+| 12b | Stage 6b metrics + D38 amendment | `aaf/metrics.py`, `tests/test_metrics.py` | 24 tests OK (incl. near-zero baseline, joint resampling, per-horizon, week blocks) |
 
 ---
 
@@ -416,7 +418,7 @@ _Frozen text committed in `d369009`._
 - Inputs: only events that started before t; running alerts have unknown ends; history lookback ≤ 72 h.
 
 ### 12.3 Metrics and claims
-- **Primary metric:** Brier skill score of the map target averaged over h = 1 … 24, **macro-averaged over units** (each unit counts equally), vs the **best baseline** = the baseline with the best validation Brier score (chosen before any test).
+- **Primary metric** (amended by D38): skill = 1 − macroBrier(model) / macroBrier(best baseline), Brier averaged over h = 1 … 24 and per unit, then over units (each unit counts equally), one ratio; micro skill and per-horizon skill reported alongside; vs the **best baseline** = the baseline with the best validation Brier score (chosen before any test).
 - Also: log loss; micro averages (report only); reliability table (10 bins) + ECE, "confident but wrong" share (≥ 0.8 or ≤ 0.2 and wrong), PR-AUC (report only).
 - Next start: log score of the binned distribution; Brier for P(start within 1 / 3 / 6 h).
 - Duration: censoring-aware log score; CRPS; pinball loss 10 / 50 / 90 %; coverage of the 80 % interval.
@@ -453,3 +455,11 @@ _Frozen text committed in `d369009`._
 - Training labels pre-reform from the official file, test labels post-reform from alerts.in.ua; consistency supported only indirectly (Step 8b Check C).
 - 61 units have only ~10 months of training history (after their switch).
 - Occupied status unresolved at freeze time (D30).
+
+### 12.10 Wording rules for results (D38)
+- Always give the estimate **with its 95 % interval** and the test length (post-reform: 22 days of forecast origins; pre-reform: 51 days after the outage mask).
+- If the interval includes 0: write "**no evidence of a difference**", never "no difference" or "the model is as good as".
+- Write "**beats the baseline**" only when the claim rule holds (interval excludes 0) for the primary skill.
+- Pre-reform test and validation results are **supporting evidence**, not proof for the post-reform period.
+- Report the day-block interval; if the week-block interval changes the conclusion, report the more cautious one.
+- Per-unit results are descriptive; no per-unit claims.
