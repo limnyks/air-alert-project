@@ -90,7 +90,7 @@ def main():
         replay["units"][r["hdx_pcode"]] = {"p": np.round(p, 3).tolist(), "a": np.round(actual, 3).tolist()}
     adm2_obl = {f["properties"]["adm2_pcode"]: f["properties"]["adm1_pcode"] for f in adm2}
 
-    info = {r["hdx_pcode"]: {"name": r["raion_uk"] if isinstance(r["raion_uk"], str) else "Київ", "p": [round(float(r[c]), 3) for c in ("p_1h", "p_6h", "p_24h")],
+    info = {r["hdx_pcode"]: {"name": r["raion_uk"] if isinstance(r["raion_uk"], str) else "Київ", "p": [round(float(r[c]), 3) for c in ("p_1h", "p_6h", "p_12h", "p_24h")],
                              "ex": bool(r["excluded"]), "obl": r["unit"].split(" / ")[0], "op": adm2_obl[r["hdx_pcode"]]}
             for _, r in fc.iterrows()}
     obl = {}
@@ -186,8 +186,8 @@ input[type=range]{width:100%}
   </div>
   <div class="box future" id="hz-tabs">
     <label class="k" for="hz">Forecast: chance of an alert in</label>
-    <input type="range" id="hz" min="0" max="2" step="1" value="0" aria-valuetext="1 hour">
-    <div class="ticks hzt"><span>1 hour</span><span>6 hours</span><span>24 hours</span></div>
+    <input type="range" id="hz" min="0" max="3" step="1" value="0" aria-valuetext="1 hour">
+    <div class="ticks hzt"><span>1 hour</span><span>6 hours</span><span>12 hours</span><span>24 hours</span></div>
     <div class="v" id="hz-label"></div>
   </div>
   <div class="tabs" role="group" aria-label="Level">
@@ -216,7 +216,7 @@ input[type=range]{width:100%}
       <div class="box warn"><p class="note">Research project, not a warning system. Always follow official air-raid alerts. Probabilities refer to announced alerts, not to attacks.</p></div>
     </div>
   </div>
-  <p class="note">Forecast = chance that the raion is under an announced alert at that exact moment. +1 hour: calibrated persistence (B2) - mostly "is an alert running now, and how long do they last here". +6 and +24 hours: exponentially weighted share of time under alert (B4, half-life 7 days: a day a week ago counts half). Each was the best for its horizon on the validation folds (May-July 2026); B4 is <b>not yet tested on held-out data</b>. The replay shows B3 (7-day share), the model that was tested once on the 22 post-reform days (best of four, macro Brier 0.126). Shapes: HDX COD-AB (Kartographia, CC BY-IGO). Alerts: official dataset (Vadimkin, from the official Telegram channel) and alerts.in.ua.</p>
+  <p class="note">Forecast = chance that the raion is under an announced alert at that exact moment. +1 hour: calibrated persistence (B2) - mostly "is an alert running now, and how long do they last here". +6, +12 and +24 hours: exponentially weighted share of time under alert (B4, half-life 7 days: a day a week ago counts half). Each was the best for its horizon on the validation folds (May-July 2026); B4 is <b>not yet tested on held-out data</b>. The hour of day is not used: a version with the night/day pattern (more time under alert 22:00-05:00) had a slightly lower average error on validation but less reliable probabilities, so by our pre-set rule it was not adopted. The replay shows B3 (7-day share), the model that was tested once on the 22 post-reform days (best of four, macro Brier 0.126). Shapes: HDX COD-AB (Kartographia, CC BY-IGO). Alerts: official dataset (Vadimkin, from the official Telegram channel) and alerts.in.ua.</p>
 </div>
 <div id="tip" hidden></div>
 <script>
@@ -234,7 +234,7 @@ const sub = () => document.getElementById("sub").textContent = mode === "live"
   : "Replay of the 22 post-reform test days: B3 forecast at 06:00 Kyiv vs what happened in the next 24 h.";
 document.getElementById("meta").innerHTML = "data up to: " + kyiv(m.data_up_to_utc) + "<br>forecast made: " + kyiv(m.forecast_made_utc) + "<br>raions forecast: " + m.modeled_units + "<br>code commit: " + m.code_commit_before_forecast;
 let mode = "live", day = 0, level = "raion", hz = 0;
-const HZ = ["+1h", "+6h", "+24h"];
+const HZ = ["+1h", "+6h", "+12h", "+24h"];
 const svg = document.querySelector(".map svg");
 function draw() {
   let hits = 0, sumP = 0, sumA = 0, n = 0;
@@ -262,7 +262,7 @@ for (const [id, lv] of [["lvl-raion", "raion"], ["lvl-oblast", "oblast"]]) {
 for (const [id, md] of [["tab-live", "live"], ["tab-replay", "replay"]]) {
   document.getElementById(id).addEventListener("click", () => { mode = md; for (const b of document.querySelectorAll('[aria-label="View"] button')) b.setAttribute("aria-pressed", String(b.id === id)); draw(); });
 }
-const HZTXT = ["1 hour", "6 hours", "24 hours"];
+const HZTXT = ["1 hour", "6 hours", "12 hours", "24 hours"];
 document.getElementById("hz").addEventListener("input", e => { hz = +e.target.value; e.target.setAttribute("aria-valuetext", HZTXT[hz]); draw(); });
 document.getElementById("day").addEventListener("input", e => { day = +e.target.value; draw(); });
 const tip = document.getElementById("tip");

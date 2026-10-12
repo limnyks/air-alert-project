@@ -1,7 +1,7 @@
-"""Step 17: live forecast for +1 h, +6 h and +24 h from the freshest alerts.in.ua snapshot (D44).
+"""Step 17: live forecast for +1 h, +6 h, +12 h and +24 h from the freshest alerts.in.ua snapshot (D44).
 
 Per horizon, the model that was best on the validation folds (step16): +1 h -> B2 (calibrated persistence),
-+6 h and +24 h -> B4 (exponentially weighted share, half-life from config/b4_halflife.json). B3 is kept as the
++6, +12 and +24 h -> B4 (exponentially weighted share, half-life from config/b4_halflife.json). B3 is kept as the
 tested reference column. Target = P(raion under an announced air-raid alert at the moment cutoff + h).
 
 Data rules as in step14 (oblast-wide OR raion alert, air raid only, merged, gaps <= 2 min joined), plus:
@@ -30,7 +30,7 @@ from step14_live_forecast import LIVE, OUT, merged_share, to_ns  # noqa: E402
 
 H, MIN = config.HOUR_NS, config.MIN_NS
 DAY = 24 * H
-HORIZONS = (1, 6, 24)
+HORIZONS = (1, 6, 12, 24)
 B4 = json.loads((config.ROOT / "config" / "b4_halflife.json").read_text())
 
 
@@ -88,7 +88,7 @@ def main():
         b4 = bl.ewshare(h, [T], B4["half_life_days"], covered=covered, since=since)[0]
         rows.append({"unit": x["unit"], "raion_uk": x["raion_uk"], "hdx_pcode": x["hdx_pcode"], "excluded": bool(x["excluded"]),
                      "on_at_cutoff": int(h.state_at([T])[0]),
-                     "p_1h": float(b2[0]), "p_6h": float(b4[5]), "p_24h": float(b4[23]),
+                     "p_1h": float(b2[0]), "p_6h": float(b4[5]), "p_12h": float(b4[11]), "p_24h": float(b4[23]),
                      "b3_ref": merged_share(s, np.minimum(e, T), T - 7 * DAY, T)})
     f = pd.DataFrame(rows)
 
@@ -104,6 +104,7 @@ def main():
     targets = {f"+{k}h": (cutoff + pd.Timedelta(hours=k)) for k in HORIZONS}
     meta = {"models": {"+1h": "B2 calibrated persistence (best at +1 h on validation)",
                        "+6h": f"B4 exponentially weighted share, half-life {B4['half_life_days']} d (chosen on validation, not tested on held-out data)",
+                       "+12h": f"B4 exponentially weighted share, half-life {B4['half_life_days']} d (chosen on validation, not tested on held-out data)",
                        "+24h": f"B4 exponentially weighted share, half-life {B4['half_life_days']} d (chosen on validation, not tested on held-out data)",
                        "b3_ref": "B3 7-day rolling share (best on the post-reform test, D39)"},
             "data_up_to_utc": cutoff.isoformat(), "data_up_to_kyiv": cutoff.tz_convert(config.TZ).isoformat(),
@@ -115,13 +116,15 @@ def main():
                     "Not a warning system - follow official alerts.",
             "observed_last_7_days_by_oblast": mix.round(3).reset_index().to_dict(orient="records")}
     stem = f"horizons_{folder.name}"
+    if (OUT / f"{stem}.csv").exists():                              # never overwrite a committed forecast
+        stem += f"_made{now:%H%M}Z"
     OUT.mkdir(exist_ok=True)
     f.to_csv(OUT / f"{stem}.csv", index=False)
     (OUT / f"{stem}.json").write_text(json.dumps(meta, indent=2, ensure_ascii=False))
     mod = f[~f["excluded"]]
     print(f"data up to: {meta['data_up_to_kyiv']} (Kyiv); targets: " + ", ".join(f"{k} {v.tz_convert(config.TZ):%H:%M %d %b}" for k, v in targets.items()))
     print(f"modeled units: {len(mod)}; under alert at cutoff: {int(mod['on_at_cutoff'].sum())}")
-    print(mod[["p_1h", "p_6h", "p_24h", "b3_ref"]].describe().loc[["mean", "50%", "min", "max"]].round(3).to_string())
+    print(mod[["p_1h", "p_6h", "p_12h", "p_24h", "b3_ref"]].describe().loc[["mean", "50%", "min", "max"]].round(3).to_string())
     print(f"saved -> forecasts/{stem}.csv and .json  -> COMMIT NOW, before {targets['+1h'].isoformat()}")
 
 
