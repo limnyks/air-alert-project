@@ -87,19 +87,43 @@ def main():
         p = (ontime_upto(h, t) - ontime_upto(h, t - 7 * D)) / (7 * D)
         actual = (ontime_upto(h, t + D) - ontime_upto(h, t)) / D
         replay["units"][r["hdx_pcode"]] = {"p": np.round(p, 3).tolist(), "a": np.round(actual, 3).tolist()}
+    adm2_obl = {f["properties"]["adm2_pcode"]: f["properties"]["adm1_pcode"] for f in adm2}
 
     info = {r["hdx_pcode"]: {"name": r["raion_uk"] if isinstance(r["raion_uk"], str) else "Київ", "p": round(float(r["p_alert_b3"]), 3),
-                             "ex": bool(r["excluded"]), "obl": r["unit"].split(" / ")[0]} for _, r in fc.iterrows()}
+                             "ex": bool(r["excluded"]), "obl": r["unit"].split(" / ")[0], "op": adm2_obl[r["hdx_pcode"]]}
+            for _, r in fc.iterrows()}
+    obl = {}
+    for f in adm1:
+        op = f["properties"]["adm1_pcode"]
+        mods = [pc for pc, i in info.items() if i["op"] == op and not i["ex"]]
+        n_all = sum(1 for i in info.values() if i["op"] == op)
+        if not n_all:
+            continue
+        o = {"name": f["properties"]["adm1_name1"], "n": len(mods), "n_all": n_all}
+        if mods:
+            o["p"] = round(float(np.mean([info[pc]["p"] for pc in mods])), 3)
+            o["rp"] = np.round(np.mean([replay["units"][pc]["p"] for pc in mods], axis=0), 3).tolist()
+            o["ra"] = np.round(np.mean([replay["units"][pc]["a"] for pc in mods], axis=0), 3).tolist()
+            o["rhit"] = [int(sum(replay["units"][pc]["a"][d] > 0 for pc in mods)) for d in range(len(days))]
+        obl[op] = o
+    def center(f):
+        pr = f["properties"]
+        if pr.get("center_lon") is not None and pr.get("center_lat") is not None:
+            return proj(pr["center_lon"], pr["center_lat"])
+        pts = [proj(lon, lat) for ring in rings(f["geometry"]) for lon, lat, *_ in ring]   # fallback: vertex mean
+        return (sum(x for x, _ in pts) / len(pts), sum(y for _, y in pts) / len(pts))
+    labels = "".join('<text class="ol" x="{:.0f}" y="{:.0f}">{}</text>'.format(*center(f), f["properties"]["adm1_name1"])
+                     for f in adm1 if f["properties"]["adm1_pcode"] in obl)
     shapes = []
     for f in adm2:
         pc, pr = f["properties"]["adm2_pcode"], f["properties"]
         kind = "ex" if pc in info and info[pc]["ex"] else ("m" if pc in info else "nd")
         label = (info[pc]["name"] if pc in info else pr["adm2_name1"]) + ", " + pr["adm1_name1"]
-        shapes.append(f'<path class="r {kind}" data-pc="{pc}" data-label="{label}" d="{path(f["geometry"], proj)}"/>')
+        shapes.append(f'<path class="r {kind}" data-pc="{pc}" data-op="{pr["adm1_pcode"]}" data-label="{label}" d="{path(f["geometry"], proj)}"/>')
     borders = "".join(f'<path class="ob" d="{path(f["geometry"], proj, 0.9)}"/>' for f in adm1)
     mix = {m["unit_name"]: m for m in meta["observed_last_7_days_by_oblast"]}
-    page = TEMPLATE.replace("__H__", f"{height:.0f}").replace("__SHAPES__", "".join(shapes)).replace("__BORDERS__", borders)
-    page = page.replace("__DATA__", json.dumps({"info": info, "replay": replay, "meta": meta, "mix": mix}, ensure_ascii=False))
+    page = TEMPLATE.replace("__H__", f"{height:.0f}").replace("__SHAPES__", "".join(shapes)).replace("__BORDERS__", borders).replace("__LABELS__", labels)
+    page = page.replace("__DATA__", json.dumps({"info": info, "obl": obl, "replay": replay, "meta": meta, "mix": mix}, ensure_ascii=False))
     OUT.parent.mkdir(exist_ok=True)
     OUT.write_text(page, encoding="utf-8")
     print(f"saved -> {OUT.relative_to(config.ROOT)} ({OUT.stat().st_size/1e6:.2f} MB); raion shapes {len(shapes)}; forecast file {fc_csv.name}")
@@ -110,12 +134,12 @@ TEMPLATE = r"""<title>Raion Alert Outlook</title>
 <style>
 /* Layout: one wide map with a slim control column; replay controls under the map */
 :root{--bg:#f3f4f6;--panel:#ffffff;--ink:#1d2330;--muted:#5f6878;--line:#c9ced8;--nodata:#dfe2e8;
---p0:#e9ebef;--p1:#f4c7a8;--p2:#ec8a5e;--p3:#d1452f;--p4:#8e1b17;--hit:#111827;
+--p0:#e6e8ec;--p1:#f8d3c8;--p2:#f29a83;--p3:#e5523a;--p4:#c3110b;--hit:#111827;--border:#1b2230;
 --display:"Bricolage Grotesque",Georgia,serif;--body:"IBM Plex Sans",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14171d;--panel:#1c2028;--ink:#e6e8ec;--muted:#9aa3b2;--line:#3a404c;--nodata:#2a2f39;
---p0:#2b303a;--p1:#6b3f30;--p2:#a8532f;--p3:#de5a3c;--p4:#ff8a6a;--hit:#f5f6f8;color-scheme:dark}}
+--p0:#2a2e36;--p1:#4f2a27;--p2:#7d2a22;--p3:#b8261b;--p4:#f01e12;--border:#f2f4f7;--hit:#f5f6f8;color-scheme:dark}}
 :root[data-theme="dark"]{--bg:#14171d;--panel:#1c2028;--ink:#e6e8ec;--muted:#9aa3b2;--line:#3a404c;--nodata:#2a2f39;
---p0:#2b303a;--p1:#6b3f30;--p2:#a8532f;--p3:#de5a3c;--p4:#ff8a6a;--hit:#f5f6f8;color-scheme:dark}
+--p0:#2a2e36;--p1:#4f2a27;--p2:#7d2a22;--p3:#b8261b;--p4:#f01e12;--border:#f2f4f7;--hit:#f5f6f8;color-scheme:dark}
 body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--body)}
 .wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:20px 32px;display:grid;gap:16px}
 h1{font:600 clamp(24px,3.2vw,34px)/1.1 var(--display);margin:0;text-wrap:balance}
@@ -124,11 +148,14 @@ h1{font:600 clamp(24px,3.2vw,34px)/1.1 var(--display);margin:0;text-wrap:balance
 @media (max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}}
 .map{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px;min-width:0}
 svg{width:100%;height:auto;display:block}
-.r{stroke:var(--panel);stroke-width:.5;cursor:pointer}
+.r{stroke:var(--panel);stroke-width:.4;cursor:pointer}
+.lvl-oblast .r{stroke-width:0}
 .r.nd{fill:url(#hatch-nd)}.r.ex{fill:url(#hatch-ex)}
 .r:hover,.r:focus{stroke:var(--ink);stroke-width:1.4}
 .r.hit{stroke:var(--hit);stroke-width:1.6}
-.ob{fill:none;stroke:var(--ink);stroke-width:1.1;opacity:.55;pointer-events:none}
+.ob{fill:none;stroke:var(--border);stroke-width:2.2;stroke-linejoin:round;pointer-events:none}
+.ol{font:600 11px var(--body);fill:var(--ink);paint-order:stroke;stroke:var(--panel);stroke-width:3px;text-anchor:middle;pointer-events:none;display:none}
+.lvl-oblast .ol{display:block}
 .side{display:grid;gap:12px;align-content:start;min-width:0}
 .box{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
 .k{font:500 11px/1.3 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
@@ -154,15 +181,19 @@ input[type=range]{width:100%}
     <button id="tab-live" aria-pressed="true">Next 24 hours</button>
     <button id="tab-replay" aria-pressed="false">Replay: test days</button>
   </div>
+  <div class="tabs" role="group" aria-label="Level">
+    <button id="lvl-raion" aria-pressed="true">Raions</button>
+    <button id="lvl-oblast" aria-pressed="false">Oblasts</button>
+  </div>
   <div class="grid">
     <div class="map"><svg viewBox="0 0 1000 __H__" role="img" aria-label="Map of Ukrainian raions coloured by alert probability">
       <defs>
         <pattern id="hatch-nd" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="var(--nodata)"/><line x1="0" y1="0" x2="0" y2="6" stroke="var(--line)" stroke-width="2"/></pattern>
         <pattern id="hatch-ex" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="var(--p3)"/><line x1="0" y1="0" x2="0" y2="6" stroke="var(--p4)" stroke-width="3"/></pattern>
       </defs>
-      <g id="raions">__SHAPES__</g><g>__BORDERS__</g></svg></div>
+      <g id="raions">__SHAPES__</g><g>__BORDERS__</g><g>__LABELS__</g></svg></div>
     <div class="side">
-      <div class="box"><div class="k" id="legend-title">Chance of being under alert</div>
+      <div class="box"><div class="k" id="legend-title">Chance of being under alert (redder = higher)</div>
         <div class="legend"><span style="background:var(--p0)"></span><span style="background:var(--p1)"></span><span style="background:var(--p2)"></span><span style="background:var(--p3)"></span><span style="background:var(--p4)"></span></div>
         <div class="ticks"><span>0</span><span>10%</span><span>20%</span><span>35%</span><span>50%+</span></div>
         <p class="note" style="margin-top:8px"><span class="sw" style="background:var(--p3)"></span>Hatched red: near-permanent alert (&gt;80% of time), not forecast<br><span class="sw" style="background:var(--nodata)"></span>Hatched grey: no data (Crimea, Sevastopol, Luhanska, Chornobyl zone)</p>
@@ -189,13 +220,15 @@ const paths = [...document.querySelectorAll(".r.m")];
 const m = DATA.meta;
 document.getElementById("sub").textContent = "Data up to " + kyiv(m.data_up_to_utc) + " Kyiv time. Forecast window " + kyiv(m.window_start_utc) + " to " + kyiv(m.window_end_utc) + ".";
 document.getElementById("meta").innerHTML = "data up to: " + kyiv(m.data_up_to_utc) + "<br>forecast made: " + kyiv(m.forecast_made_utc) + "<br>raions forecast: " + m.modeled_units + "<br>code commit: " + m.code_commit_before_forecast;
-let mode = "live", day = 0;
+let mode = "live", day = 0, level = "raion";
+const svg = document.querySelector(".map svg");
 function draw() {
   let hits = 0, sumP = 0, sumA = 0, n = 0;
   for (const el of paths) {
     const pc = el.dataset.pc, i = DATA.info[pc];
     let p = i.p, hit = false;
     if (mode === "replay") { const r = DATA.replay.units[pc]; p = r.p[day]; hit = r.a[day] > 0; sumP += p; sumA += r.a[day]; n++; if (hit) hits++; }
+    if (level === "oblast") { const o = DATA.obl[i.op]; p = mode === "replay" ? o.rp[day] : o.p; hit = false; }
     el.style.fill = col(p); el.classList.toggle("hit", hit);
   }
   document.getElementById("hit-note").hidden = mode !== "replay";
@@ -205,8 +238,12 @@ function draw() {
     document.getElementById("day-stats").innerHTML = "raions with an alert in the next 24 h: " + hits + " of " + n + "<br>mean forecast " + pct(sumP / n) + " vs actual share of time " + pct(sumA / n);
   }
 }
+for (const [id, lv] of [["lvl-raion", "raion"], ["lvl-oblast", "oblast"]]) {
+  document.getElementById(id).addEventListener("click", () => { level = lv; svg.classList.toggle("lvl-oblast", lv === "oblast");
+    for (const b of document.querySelectorAll('[aria-label="Level"] button')) b.setAttribute("aria-pressed", String(b.id === id)); draw(); });
+}
 for (const [id, md] of [["tab-live", "live"], ["tab-replay", "replay"]]) {
-  document.getElementById(id).addEventListener("click", () => { mode = md; for (const b of document.querySelectorAll(".tabs button")) b.setAttribute("aria-pressed", String(b.id === id)); draw(); });
+  document.getElementById(id).addEventListener("click", () => { mode = md; for (const b of document.querySelectorAll('[aria-label="View"] button')) b.setAttribute("aria-pressed", String(b.id === id)); draw(); });
 }
 document.getElementById("day").addEventListener("input", e => { day = +e.target.value; draw(); });
 const tip = document.getElementById("tip");
@@ -214,6 +251,14 @@ document.getElementById("raions").addEventListener("mousemove", e => {
   const el = e.target.closest(".r"); if (!el) { tip.hidden = true; return; }
   const pc = el.dataset.pc, i = DATA.info[pc];
   let txt = el.dataset.label;
+  const o = DATA.obl[el.dataset.op];
+  if (level === "oblast" && o) {
+    txt = "<b>" + o.name + "</b>";
+    if (!o.n) txt += "<br>all raions near-permanent alert";
+    else if (mode === "live") txt += "<br>average chance of alert: <b>" + pct(o.p) + "</b><br>(= expected share of its " + o.n + " forecast raions)";
+    else txt += "<br>forecast " + pct(o.rp[day]) + " · actual " + pct(o.ra[day]) + "<br>raions with an alert: " + o.rhit[day] + " of " + o.n;
+    tip.innerHTML = txt; tip.hidden = false; tip.style.left = (e.clientX + 14) + "px"; tip.style.top = (e.clientY + 14) + "px"; return;
+  }
   if (el.classList.contains("nd")) txt += "<br>no data";
   else if (i && i.ex) txt += "<br>near-permanent alert, not forecast";
   else if (mode === "live") txt += "<br>chance of alert: <b>" + pct(i.p) + "</b>";
