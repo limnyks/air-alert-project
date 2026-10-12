@@ -121,7 +121,9 @@ def main():
         kind = "ex" if pc in info and info[pc]["ex"] else ("m" if pc in info else "nd")
         label = (info[pc]["name"] if pc in info else pr["adm2_name1"]) + ", " + pr["adm1_name1"]
         shapes.append(f'<path class="r {kind}" data-pc="{pc}" data-op="{pr["adm1_pcode"]}" data-label="{label}" d="{path(f["geometry"], proj)}"/>')
-    borders = "".join(f'<path class="ob" d="{path(f["geometry"], proj, 0.9)}"/>' for f in adm1)
+    bd = [path(f["geometry"], proj, 0.9) for f in adm1]
+    # light halo under a dark line: visible on white (low) raions, on burgundy (high) raions and on the background
+    borders = "".join(f'<path class="obh" d="{d}"/>' for d in bd) + "".join(f'<path class="ob" d="{d}"/>' for d in bd)
     mix = {m["unit_name"]: m for m in meta["observed_last_7_days_by_oblast"]}
     page = TEMPLATE.replace("__H__", f"{height:.0f}").replace("__SHAPES__", "".join(shapes)).replace("__BORDERS__", borders).replace("__LABELS__", labels)
     page = page.replace("__DATA__", json.dumps({"info": info, "obl": obl, "replay": replay, "meta": meta, "mix": mix}, ensure_ascii=False))
@@ -135,12 +137,12 @@ TEMPLATE = r"""<title>Raion Alert Outlook</title>
 <style>
 /* Layout: one wide map with a slim control column; replay controls under the map */
 :root{--bg:#f3f4f6;--panel:#ffffff;--ink:#1d2330;--muted:#5f6878;--line:#c9ced8;--nodata:#dfe2e8;
---p0:#ffffff;--p1:#f8d3c8;--p2:#e3221b;--p3:#e5523a;--p4:#6b0f1a;--hit:#111827;--border:#1b2230;
+--p0:#ffffff;--p1:#f8d3c8;--p2:#e3221b;--p3:#e5523a;--p4:#6b0f1a;--hit:#111827;--border:#11151c;--halo:#ffffff;
 --display:"Bricolage Grotesque",Georgia,serif;--body:"IBM Plex Sans",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14171d;--panel:#1c2028;--ink:#e6e8ec;--muted:#9aa3b2;--line:#3a404c;--nodata:#2a2f39;
---p0:#ffffff;--p1:#4f2a27;--p2:#e3221b;--p3:#b8261b;--p4:#6b0f1a;--border:#f2f4f7;--hit:#f5f6f8;color-scheme:dark}}
+--p0:#ffffff;--p1:#4f2a27;--p2:#e3221b;--p3:#b8261b;--p4:#6b0f1a;--border:#0b0d12;--halo:#c9ced8;--hit:#f5f6f8;color-scheme:dark}}
 :root[data-theme="dark"]{--bg:#14171d;--panel:#1c2028;--ink:#e6e8ec;--muted:#9aa3b2;--line:#3a404c;--nodata:#2a2f39;
---p0:#ffffff;--p1:#4f2a27;--p2:#e3221b;--p3:#b8261b;--p4:#6b0f1a;--border:#f2f4f7;--hit:#f5f6f8;color-scheme:dark}
+--p0:#ffffff;--p1:#4f2a27;--p2:#e3221b;--p3:#b8261b;--p4:#6b0f1a;--border:#0b0d12;--halo:#c9ced8;--hit:#f5f6f8;color-scheme:dark}
 body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--body)}
 .wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:20px 32px;display:grid;gap:16px}
 h1{font:600 clamp(24px,3.2vw,34px)/1.1 var(--display);margin:0;text-wrap:balance}
@@ -154,7 +156,9 @@ svg{width:100%;height:auto;display:block}
 .r.nd{fill:url(#hatch-nd)}.r.ex{fill:url(#hatch-ex)}
 .r:hover,.r:focus{stroke:var(--ink);stroke-width:1.4}
 .r.hit{stroke:var(--hit);stroke-width:1.6}
-.ob{fill:none;stroke:var(--border);stroke-width:2.2;stroke-linejoin:round;pointer-events:none}
+.ob,.obh{fill:none;stroke-linejoin:round;pointer-events:none}
+.obh{stroke:var(--halo);stroke-width:4.2}
+.ob{stroke:var(--border);stroke-width:1.9}
 .ol{font:600 11px var(--body);fill:var(--ink);paint-order:stroke;stroke:var(--panel);stroke-width:3px;text-anchor:middle;pointer-events:none;display:none}
 .lvl-oblast .ol{display:block}
 .side{display:grid;gap:12px;align-content:start;min-width:0}
