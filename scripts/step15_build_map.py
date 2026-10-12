@@ -140,15 +140,15 @@ def main():
 TEMPLATE = r"""<title>Raion Alert Outlook</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400..700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Design language: flat bordered cells, charcoal / white / grey, one mint accent, tight grotesque + mono data type.
+/* Design language: flat bordered cells, charcoal / white / grey, one orange accent (UI only, never on the map), scroll-driven section tones, tight grotesque + mono data type.
    The alert colour scale (white -> red -> burgundy) keeps its meaning and is not part of the UI chrome. */
 :root{--bg:#ffffff;--panel:#ffffff;--surface:#e0e0e0;--ink:#232323;--muted:#666666;--line:#232323;--rs:#bcbcbc;--nodata:#cfcfcf;
---mint:#a1ffcb;--char:#232323;--onchar:#f4f4f4;
+--accent:#ff8a3d;--tone-grey:#e0e0e0;--char:#232323;--onchar:#f4f4f4;
 --p0:#ffffff;--p1:#f8d3c8;--p2:#e3221b;--p3:#e5523a;--p4:#6b0f1a;--hit:#111827;--border:#11151c;--halo:#ffffff;
 --body:"Inter Tight","Helvetica Neue",Helvetica,Arial,system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1a1a1a;--panel:#232323;--surface:#151515;--ink:#f4f4f4;--muted:#a3a3a3;--line:rgba(244,244,244,.5);--rs:#3b3b3b;--nodata:#2f2f2f;
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1a1a1a;--panel:#232323;--surface:#151515;--ink:#f4f4f4;--muted:#a3a3a3;--line:rgba(244,244,244,.5);--rs:#3b3b3b;--nodata:#2f2f2f;--tone-grey:#101010;
 --p1:#4f2a27;--p3:#b8261b;--border:#0b0d12;--halo:#c9ced8;--hit:#f5f6f8;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#1a1a1a;--panel:#232323;--surface:#151515;--ink:#f4f4f4;--muted:#a3a3a3;--line:rgba(244,244,244,.5);--rs:#3b3b3b;--nodata:#2f2f2f;
+:root[data-theme="dark"]{--bg:#1a1a1a;--panel:#232323;--surface:#151515;--ink:#f4f4f4;--muted:#a3a3a3;--line:rgba(244,244,244,.5);--rs:#3b3b3b;--nodata:#2f2f2f;--tone-grey:#101010;
 --p1:#4f2a27;--p3:#b8261b;--border:#0b0d12;--halo:#c9ced8;--hit:#f5f6f8;color-scheme:dark}
 [hidden]{display:none!important}
 body{background:var(--bg);color:var(--ink);font:450 15px/1.45 var(--body);letter-spacing:-.015em}
@@ -158,7 +158,7 @@ body{background:var(--bg);color:var(--ink);font:450 15px/1.45 var(--body);letter
 .cell{display:flex;align-items:center;padding:0 18px;min-height:56px;border-right:1px solid var(--line);font:400 12px var(--mono);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
 .cell:last-child{border-right:0}.cell.grow{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
 .logo{width:56px;padding:0;justify-content:center;background:var(--char)}
-.mint{background:var(--mint);color:#232323;font:450 15px var(--body);text-transform:none;letter-spacing:-.01em;gap:28px;justify-content:space-between;min-width:170px}
+.acc{background:var(--accent);color:#232323;cursor:pointer;font:450 15px var(--body);text-transform:none;letter-spacing:-.01em;gap:28px;justify-content:space-between;min-width:170px}
 .hero{background:var(--char);color:var(--onchar);padding:clamp(20px,3.4vw,40px) clamp(16px,3vw,32px) 24px;border-bottom:1px solid var(--line)}
 h1{font:450 clamp(38px,8.6vw,116px)/.9 var(--body);letter-spacing:-.05em;text-transform:uppercase;margin:0;text-wrap:balance}
 .sub{color:#bdbdbd;margin:16px 0 0;font:400 13px/1.55 var(--mono);letter-spacing:.01em;max-width:80ch}
@@ -186,20 +186,20 @@ h1{font:450 clamp(38px,8.6vw,116px)/.9 var(--body);letter-spacing:-.05em;text-tr
 .tabs{display:flex;flex-wrap:wrap;padding-right:1px}
 .tabs button{flex:1 1 auto;font:450 15px var(--body);letter-spacing:-.01em;padding:13px 18px;border:1px solid var(--line);margin:0 -1px -1px 0;border-radius:0;background:var(--panel);color:var(--ink);cursor:pointer}
 .tabs button:hover{background:var(--surface)}
-.tabs button[aria-pressed="true"]{background:var(--mint);color:#232323}
+.tabs button[aria-pressed="true"]{background:var(--accent);color:#232323}
 .tabs button:disabled{opacity:.35;cursor:default}
 .top .tabs{padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}.top .tabs button{margin:0;border-width:0 1px 0 0;font-size:16px;padding:16px 20px;text-align:left}.top .tabs button:last-child{border-right:0}
 .legend{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;margin-top:6px}
 .legend span{height:12px}.ticks{display:flex;justify-content:space-between;font:400 12px var(--mono);color:var(--muted);margin-top:4px}
 .sw{display:inline-block;width:14px;height:12px;vertical-align:-2px;margin-right:6px;border:1px solid var(--line)}
-#tip{position:fixed;pointer-events:none;background:var(--char);color:var(--onchar);padding:8px 11px;font:450 13px/1.4 var(--body);max-width:260px;border:1px solid var(--mint)}
+#tip{position:fixed;pointer-events:none;background:var(--char);color:var(--onchar);padding:8px 11px;font:450 13px/1.4 var(--body);max-width:260px;border:1px solid var(--accent)}
 .future{display:grid;gap:8px}
 .hzt{color:var(--ink)}
 input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:30px;background:transparent;margin:0;cursor:pointer}
 input[type=range]::-webkit-slider-runnable-track{height:2px;background:var(--ink)}
 input[type=range]::-moz-range-track{height:2px;background:var(--ink)}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;margin-top:-11px;background:var(--mint);border:1px solid #232323;border-radius:0}
-input[type=range]::-moz-range-thumb{width:22px;height:22px;background:var(--mint);border:1px solid #232323;border-radius:0}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;margin-top:-11px;background:var(--accent);border:1px solid #232323;border-radius:0}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;background:var(--accent);border:1px solid #232323;border-radius:0}
 .note{color:var(--muted);font-size:13px;line-height:1.45;margin:0}
 .warn{background:var(--char);border-color:var(--char)}.warn .note{color:#d9d9d9}
 .prow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
@@ -216,18 +216,40 @@ select{font:450 14px var(--body);padding:10px 12px;border-radius:0;border:1px so
 .tbars button[aria-pressed="true"]{outline:2px solid var(--ink);outline-offset:1px}
 .tbt{display:flex;justify-content:space-between;font:400 12px var(--mono);color:var(--muted)}
 :focus-visible{outline:2px solid var(--ink);outline-offset:2px}
-@media (max-width:700px){#dataline{display:none}.cell{padding:0 12px}.mint{min-width:0;flex:1 1 auto}
+@media (max-width:700px){#dataline{display:none}.cell{padding:0 12px}.acc{min-width:0;flex:1 1 auto}
   .top .tabs{grid-template-columns:minmax(0,1fr)}.top .tabs button{padding:14px 16px;font-size:15px;border-width:0 0 1px 0}.top .tabs button:last-child{border-bottom:0}}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* scroll-driven tones: the page background follows the section in the middle of the screen */
+body{transition:background-color .7s cubic-bezier(.2,.7,.2,1)}
+body[data-tone="grey"]{background:var(--tone-grey)}
+body[data-tone="accent"]{background:var(--accent)}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--panel);border:1px solid var(--line)}
+.top{border-top:0}
+.prog{position:absolute;left:0;right:0;bottom:-1px;height:3px;background:var(--accent);transform-origin:0 50%;transform:scaleX(0)}
+.acc{border:0;font:450 15px var(--body);transition:padding .3s}
+.acc:hover .arr{transform:translateX(6px)}.arr{transition:transform .3s;display:inline-block}
+.hero{overflow:hidden}
+h1{will-change:transform}
+.r.m{transition:fill .45s cubic-bezier(.2,.7,.2,1)}
+.tabs button{transition:background-color .25s}
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
+.foot{border:1px solid var(--line);padding:clamp(28px,6vw,72px) clamp(16px,3vw,32px);color:#232323;display:grid;gap:18px;overflow:hidden}
+body[data-tone="accent"] .foot{border-color:#232323}
+.foot h2{font:450 clamp(40px,9.4vw,128px)/.88 var(--body);letter-spacing:-.055em;text-transform:uppercase;margin:0;color:var(--ink);transform:translateX(12%);opacity:0;transition:transform 1s cubic-bezier(.2,.7,.2,1),opacity 1s,color .7s}
+body[data-tone="accent"] .foot h2,body[data-tone="accent"] .foot p{color:#232323}
+.foot.in h2{transform:none;opacity:1}
+.foot p{font:400 13px/1.5 var(--mono);letter-spacing:.02em;margin:0;color:var(--muted);max-width:70ch;transition:color .7s}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}.reveal{opacity:1;transform:none}.foot h2{opacity:1;transform:none}h1{transform:none!important}}
 </style>
 <div class="wrap">
-  <div class="top">
-    <div class="bar">
-      <div class="cell logo" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 40 40"><circle cx="20" cy="20" r="14" fill="none" stroke="#f4f4f4" stroke-width="2"/><circle cx="20" cy="20" r="8" fill="none" stroke="#f4f4f4" stroke-width="1" opacity=".5"/><circle cx="20" cy="20" r="4" fill="#a1ffcb"/></svg></div>
+  <div class="bar">
+      <div class="cell logo" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 40 40"><circle cx="20" cy="20" r="14" fill="none" stroke="#f4f4f4" stroke-width="2"/><circle cx="20" cy="20" r="8" fill="none" stroke="#f4f4f4" stroke-width="1" opacity=".5"/><circle cx="20" cy="20" r="4" fill="#ff8a3d"/></svg></div>
       <div class="cell" id="clock" aria-label="Current Kyiv time">Kyiv --:--</div>
       <div class="cell grow" id="dataline"></div>
-      <div class="cell mint"><span>Next 24 h</span><span aria-hidden="true">&rarr;</span></div>
-    </div>
+      <button class="cell acc" id="go-map" type="button"><span>Next 24 h</span><span class="arr" aria-hidden="true">&rarr;</span></button>
+    <div class="prog" id="prog" aria-hidden="true"></div>
+  </div>
+  <div class="top">
     <div class="hero"><h1>Raion Alert Outlook</h1>
       <p class="sub" id="sub"></p></div>
     <div class="tabs" role="group" aria-label="View">
@@ -291,6 +313,10 @@ select{font:450 14px var(--body);padding:10px 12px;border-radius:0;border:1px so
       <div class="box warn"><p class="note">Research project, not a warning system. Always follow official air-raid alerts. Probabilities refer to announced alerts, not to attacks.</p></div>
     </div>
   </div>
+  <section class="foot" id="foot">
+    <h2>Not a warning system.<br>Follow official alerts.</h2>
+    <p>Research project. Probabilities of announced air-raid alerts, not of attacks - a low number never means safe.</p>
+  </section>
 </div>
 <div id="tip" hidden></div>
 <script>
@@ -304,8 +330,8 @@ const pct = p => (100 * p).toFixed(0) + "%";
 const HZ = Array.from({length: 24}, (_, k) => "+" + (k + 1) + "h");
 const HZTXT = HZ.map(h => h.replace("h", " hours").replace("+1 hours", "+1 hour"));
 const m = DATA.meta, PD = DATA.past;
-const clock = () => document.getElementById("clock").textContent = "Kyiv " + new Date().toLocaleTimeString("en-GB", {timeZone: "Europe/Kyiv", hour: "2-digit", minute: "2-digit"});
-clock(); setInterval(clock, 30000);
+const clock = () => document.getElementById("clock").textContent = "Kyiv " + new Date().toLocaleTimeString("en-GB", {timeZone: "Europe/Kyiv", hour: "2-digit", minute: "2-digit", second: "2-digit"});
+clock(); setInterval(clock, 1000);
 document.getElementById("dataline").textContent = "Data up to " + kyiv(m.data_up_to_utc) + " Kyiv";
 const svg = document.querySelector("#map1 svg");
 const svg2 = svg.cloneNode(true);                       // second map: what really happened
@@ -432,6 +458,23 @@ function hover(e) {
   else { const v = pastVals(pc); if (v) txt += "<br>forecast: <b>" + pct(v.p) + "</b><br>real: <b>" + (v.a === null ? "not known yet" : v.a ? "under alert" : "no alert") + "</b>"; }
   tip.innerHTML = txt; tip.hidden = false; tip.style.left = (e.clientX + 14) + "px"; tip.style.top = (e.clientY + 14) + "px";
 }
+
+// motion: section tones, reveals, sliding title, scroll progress (all off with "reduce motion")
+const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const toned = [[".top", "paper"], ["#hz-tabs", "paper"], ["#past-box", "paper"], ["#grid", "grey"], ["#trip", "grey"], ["#foot", "accent"]];
+const toneIO = new IntersectionObserver(es => { for (const e of es) if (e.isIntersecting) document.body.dataset.tone = e.target.dataset.tone; },
+  {rootMargin: "-48% 0px -48% 0px"});
+for (const [sel, t] of toned) { const el = document.querySelector(sel); el.dataset.tone = t; toneIO.observe(el); }
+const revIO = new IntersectionObserver(es => { for (const e of es) if (e.isIntersecting) { e.target.classList.add("in"); revIO.unobserve(e.target); } }, {rootMargin: "0px 0px -8% 0px"});
+for (const el of document.querySelectorAll(".box, .map, .foot")) { if (!el.classList.contains("foot")) el.classList.add("reveal"); still ? el.classList.add("in") : revIO.observe(el); }
+const h1 = document.querySelector("h1"), prog = document.getElementById("prog");
+let ticking = false;
+addEventListener("scroll", () => { if (ticking) return; ticking = true; requestAnimationFrame(() => {
+  const y = scrollY, max = document.documentElement.scrollHeight - innerHeight;
+  prog.style.transform = "scaleX(" + (max > 0 ? Math.min(1, y / max) : 0) + ")";
+  if (!still) h1.style.transform = "translateX(" + (-Math.min(y * 0.35, 260)) + "px)";
+  ticking = false; }); }, {passive: true});
+document.getElementById("go-map").addEventListener("click", () => document.getElementById(mode === "trip" ? "trip" : "grid").scrollIntoView({behavior: still ? "auto" : "smooth", block: "start"}));
 for (const id of ["raions", "raions2"]) { const g = document.getElementById(id); g.addEventListener("mousemove", hover); g.addEventListener("mouseleave", () => tip.hidden = true); }
 draw();
 </script>
