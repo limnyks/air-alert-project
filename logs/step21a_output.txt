@@ -1,0 +1,61 @@
+[load_histories official] dropped 0 episodes starting after the snapshot cutoff, 1 zero-length episodes
+
+==========================================================================================
+TIME: Kyiv hours from the tz database (DST)
+==========================================================================================
+  2025-10-25 22:00 UTC -> 2025-10-26 01:00 Kyiv (UTC+0300)
+  2025-10-26 02:00 UTC -> 2025-10-26 04:00 Kyiv (UTC+0200)
+  2026-03-28 22:00 UTC -> 2026-03-29 00:00 Kyiv (UTC+0200)
+  2026-03-29 02:00 UTC -> 2026-03-29 05:00 Kyiv (UTC+0300)
+  2026-10-24 22:00 UTC -> 2026-10-25 01:00 Kyiv (UTC+0300)
+  2026-10-25 02:00 UTC -> 2026-10-25 04:00 Kyiv (UTC+0200)
+
+==========================================================================================
+ONGOING ALERTS (end unknown)
+==========================================================================================
+  raions with an alert running at the data end (counted as ON): 43; unknown ends before the last episode: 0
+  code (aaf/history.py, state_at): ((k > 0) & (last_end > times))  # unknown end = int64 max > any time -> ON
+
+==========================================================================================
+COVERAGE
+==========================================================================================
+  grid 2022-03-15 -> 2026-10-12 14:00 Kyiv; hours 40123, covered 0.994
+  not covered: 2026-08-29 03:00 -> 2026-09-03 03:00 Kyiv
+  not covered: 2026-09-07 08:00 -> 2026-09-12 16:00 Kyiv
+
+==========================================================================================
+SOURCE RECONCILIATION (no overlap exists: official ends 7 Sep, live month starts 12 Sep) - adjacent weeks
+==========================================================================================
+  official 22-29 Aug       hours  168  national mean share 0.208  median raion 0.113
+  official 3-7 Sep         hours  101  national mean share 0.210  median raion 0.127
+  alerts.in.ua 12-19 Sep   hours  167  national mean share 0.218  median raion 0.158
+  alerts.in.ua 19-26 Sep   hours  168  national mean share 0.269  median raion 0.171
+  gap (alerts.in.ua first week - official last 2 clean windows): national +0.009 (ratio 1.04x)
+  per raion: median difference +0.015, IQR [-0.030, +0.051], raions higher in alerts.in.ua: 74/110, correlation of raion levels +0.94
+  note: adjacent weeks cannot separate a source difference from a real change between the weeks
+
+==========================================================================================
+REGIME SHIFT TIMING - monthly national share under alert and peak Kyiv hours
+==========================================================================================
+  2025-01  share 0.190  top hours 00, 01, 23  night/avg 1.79  morning(08-11)/avg 0.48  days 31
+  2025-02  share 0.209  top hours 00, 01, 23  night/avg 1.95  morning(08-11)/avg 0.53  days 28
+  2025-03  share 0.184  top hours 00, 23, 22  night/avg 1.88  morning(08-11)/avg 0.47  days 31
+  2025-04  share 0.151  top hours 23, 01, 22  night/avg 1.57  morning(08-11)/avg 0.78  days 30
+  2025-05  share 0.147  top hours 02, 03, 04  night/avg 1.79  morning(08-11)/avg 0.76  days 31
+  2025-06  share 0.157  top hours 01, 02, 03  night/avg 2.09  morning(08-11)/avg 0.61  days 30
+  2025-07  share 0.181  top hours 00, 23, 01  night/avg 1.78  morning(08-11)/avg 0.69  days 31
+  2025-08  share 0.114  top hours 00, 23, 01  night/avg 1.72  morning(08-11)/avg 0.73  days 31
+  2025-09  share 0.149  top hours 00, 23, 01  night/avg 1.49  morning(08-11)/avg 0.58  days 30
+  2025-10  share 0.147  top hours 00, 23, 01  night/avg 1.46  morning(08-11)/avg 0.67  days 31
+  2025-11  share 0.163  top hours 23, 00, 01  night/avg 1.37  morning(08-11)/avg 0.61  days 30
+  2025-12  share 0.131  top hours 01, 02, 03  night/avg 1.31  morning(08-11)/avg 0.97  days 31
+  2026-01  share 0.147  top hours 02, 01, 00  night/avg 1.27  morning(08-11)/avg 0.87  days 31
+  2026-02  share 0.180  top hours 05, 06, 04  night/avg 1.09  morning(08-11)/avg 0.91  days 28
+  2026-03  share 0.166  top hours 22, 04, 23  night/avg 1.11  morning(08-11)/avg 0.97  days 31
+  2026-04  share 0.145  top hours 04, 03, 11  night/avg 1.16  morning(08-11)/avg 1.05  days 30
+  2026-05  share 0.170  top hours 03, 22, 04  night/avg 1.18  morning(08-11)/avg 0.97  days 31
+  2026-06  share 0.168  top hours 01, 22, 23  night/avg 1.22  morning(08-11)/avg 1.06  days 30
+  2026-07  share 0.182  top hours 04, 01, 03  night/avg 1.12  morning(08-11)/avg 1.05  days 31
+  2026-08  share 0.188  top hours 03, 00, 05  night/avg 1.10  morning(08-11)/avg 1.03  days 28
+  2026-09  share 0.243  top hours 09, 10, 11  night/avg 0.97  morning(08-11)/avg 1.15  days 23
+  2026-10  share 0.234  top hours 11, 10, 21  night/avg 0.93  morning(08-11)/avg 1.14  days 12

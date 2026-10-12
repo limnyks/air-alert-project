@@ -1,0 +1,89 @@
+[load_histories official] dropped 0 episodes starting after the snapshot cutoff, 1 zero-length episodes
+evaluation origins 15318 on 649 days (2025-01-01 -> 2026-10-11 14:00 Kyiv); choose on 2025 (373 days), confirm on 2026 (276 days, of which alerts.in.ua 30)
+training row pool: 21,197,000 rows; 2 s
+
+==========================================================================================
+STAGE 1 - level half-life (flat smoothed level); choose on 2025, confirm on 2026
+==========================================================================================
+/Users/anhelinaoleksiuk/ai-agent-program/air-alerts-forecast/aaf/final.py:76: RuntimeWarning: Mean of empty slice
+  m = np.nanmean(raw, axis=0)
+  reference flat B4 (h = 7 d, unsmoothed): 2025 0.1086 | 2026 0.0946
+  hl   7 d: 2025 0.1087 | 2026 0.0951
+  hl  14 d: 2025 0.1089 | 2026 0.0955
+  hl  30 d: 2025 0.1095 | 2026 0.0966
+  hl  60 d: 2025 0.1103 | 2026 0.0983
+  hl  90 d: 2025 0.1110 | 2026 0.0998
+  -> chosen level half-life: 7 d (lowest 2025 Brier)
+
+==========================================================================================
+STAGE 2 - hour/alert half-life (full model, level hl = 7 d, weekly refit); choose on 2025
+==========================================================================================
+  hp   7 d: 2025 0.0988 | 2026 0.0947   (15 s)
+  hp  14 d: 2025 0.0983 | 2026 0.0940   (28 s)
+  hp  30 d: 2025 0.0983 | 2026 0.0938   (52 s)
+  hp  60 d: 2025 0.0986 | 2026 0.0938   (96 s)
+  hp  90 d: 2025 0.0988 | 2026 0.0941   (160 s)
+  -> chosen hour/alert half-life: 30 d (lowest 2025 Brier)
+
+==========================================================================================
+STAGE 3 - final model (hl 7 d, hp 30 d), DAILY refit, vs flat B4
+==========================================================================================
+                                   2025 (choose)  2026 all (confirm)  2026 Jan-Aug (official)  alerts.in.ua weeks (12 Sep-11 Oct)  ECE 2025  ECE 2026 all  ECE 2026 Jan-Aug  ECE alerts.in.ua weeks  2026 top bin (>=0.8): n  mean forecast  observed
+model                                                                                                                                                                                                                                                
+B4 flat (h7)                              0.1086              0.0946                   0.0911                              0.1236    0.0041        0.0039            0.0032                  0.0111                   462444         0.8717    0.8687
+final                                     0.0981              0.0937                   0.0902                              0.1231    0.0089        0.0073            0.0064                  0.0151                   503654         0.8594    0.8677
+final (weekly refit)                      0.0983              0.0938                   0.0903                              0.1231    0.0084        0.0075            0.0065                  0.0157                   503906         0.8594    0.8667
+final without hour shift (weekly)         0.1073              0.0941                   0.0907                              0.1229    0.0060        0.0082            0.0073                  0.0161                   485467         0.8558    0.8634
+final without alert_now (weekly)          0.0994              0.0949                   0.0914                              0.1246    0.0135        0.0146            0.0139                  0.0206                   285334         0.8425    0.8978
+
+PRIMARY: skill vs flat B4 = 1 - macroBrier(final)/macroBrier(B4), mean over +1...+24 h; joint day-block 95 % interval
+  2025 (choose)                        +0.0970  day-block [+0.0846, +0.1091]  week-block [+0.0752, +0.1211]  (373 days)
+  2026 all (confirm)                   +0.0093  day-block [+0.0061, +0.0125]  week-block [+0.0056, +0.0133]  (276 days)
+  2026 Jan-Aug (official)              +0.0101  day-block [+0.0067, +0.0135]  week-block [+0.0059, +0.0143]  (246 days)
+  alerts.in.ua weeks (12 Sep-11 Oct)   +0.0040  day-block [-0.0022, +0.0106]  week-block [-0.0030, +0.0084]  (30 days)
+  ablations (what each part adds), 2026, weekly refits on both sides:
+    full vs final without hour shift (weekly)   : +0.0040 [+0.0010, +0.0070]
+    full vs final without alert_now (weekly)    : +0.0117 [+0.0098, +0.0136]
+
+CALIBRATION: ECE difference final - B4 with a day-block 95 % interval; reliability table (2026)
+  2025 (choose)                        ECE final 0.0089 vs B4 0.0041: diff +0.0048 [-0.0009, +0.0082]
+  2026 all (confirm)                   ECE final 0.0073 vs B4 0.0039: diff +0.0033 [-0.0029, +0.0054]
+  2026 Jan-Aug (official)              ECE final 0.0064 vs B4 0.0032: diff +0.0032 [-0.0026, +0.0050]
+  alerts.in.ua weeks (12 Sep-11 Oct)   ECE final 0.0151 vs B4 0.0111: diff +0.0041 [-0.0080, +0.0087]
+  bin        n_final   forecast  observed |  n_B4      forecast  observed
+  0.0-0.1    9996993   0.041    0.036   |   9917759   0.034    0.036
+  0.1-0.2    2633212   0.142    0.150   |   2546382   0.144    0.147
+  0.2-0.3    1259266   0.245    0.258   |   1441189   0.245    0.250
+  0.3-0.4     748188   0.347    0.359   |    710479   0.345    0.355
+  0.4-0.5     587588   0.449    0.462   |    588671   0.450    0.469
+  0.5-0.6     531675   0.550    0.560   |    620608   0.549    0.560
+  0.6-0.7     501552   0.650    0.657   |    490904   0.648    0.653
+  0.7-0.8     479712   0.750    0.755   |    463404   0.751    0.761
+  0.8-0.9     422702   0.848    0.858   |    311945   0.854    0.856
+  0.9-1.0      80952   0.918    0.916   |    150499   0.909    0.896
+
+PER HORIZON (2026, macro Brier)
+                 +1h     +2h     +3h     +4h     +5h     +6h     +7h     +8h     +9h    +10h    +11h    +12h    +13h    +14h    +15h    +16h    +17h    +18h    +19h    +20h    +21h    +22h    +23h    +24h
+B4 flat (h7)  0.0941  0.0943  0.0944  0.0944  0.0945  0.0946  0.0946  0.0946  0.0946  0.0946  0.0946  0.0947  0.0946  0.0947  0.0947  0.0946  0.0946  0.0947  0.0947  0.0947  0.0947  0.0947  0.0948  0.0948
+final         0.0847  0.0907  0.0923  0.0930  0.0933  0.0935  0.0939  0.0942  0.0943  0.0944  0.0943  0.0942  0.0945  0.0947  0.0948  0.0947  0.0946  0.0946  0.0947  0.0948  0.0948  0.0947  0.0946  0.0946
+skill         0.0992  0.0373  0.0223  0.0148  0.0132  0.0116  0.0078  0.0039  0.0033  0.0025  0.0031  0.0045  0.0018 -0.0002 -0.0013 -0.0011  0.0004  0.0002 -0.0007 -0.0015 -0.0015 -0.0002  0.0012  0.0027
+
+w_h curve (last daily fit; effect of an alert running now, log-odds):
+  +1:1.12 +2:0.81 +3:0.71 +4:0.66 +5:0.60 +6:0.57 +7:0.61 +8:0.46 +9:0.45 +10:0.51 +11:0.40 +12:0.50 +13:0.46 +14:0.40 +15:0.37 +16:0.38 +17:0.37 +18:0.34 +19:0.40 +20:0.27 +21:0.33 +22:0.41 +23:0.35 +24:0.38
+hour profile s (last fit, log-odds relative to the level; Kyiv hour of the target time):
+  00:-0.20 01:-0.26 02:-0.24 03:+0.08 04:+0.20 05:+0.04 06:-0.06 07:-0.16 08:-0.28 09:+0.01 10:+0.21 11:+0.09 12:+0.18 13:-0.43 14:-0.50 15:-0.34 16:-0.05 17:-0.10 18:-0.04 19:-0.46 20:-0.16 21:-0.05 22:+0.06 23:-0.21
+  (mean of s = -0.111: overall shift of the level)
+
+==========================================================================================
+LEAKAGE CHECK - final model on real histories (12 raions x 10 times)
+==========================================================================================
+/Users/anhelinaoleksiuk/ai-agent-program/air-alerts-forecast/scripts/step21b_final_model.py:264: RuntimeWarning: Mean of empty slice
+  nat_mean = np.nanmean(raw, axis=0)                                  # from all raions, bins before each origin
+problems: 0 
+/Users/anhelinaoleksiuk/ai-agent-program/air-alerts-forecast/aaf/final.py:76: RuntimeWarning: Mean of empty slice
+  m = np.nanmean(raw, axis=0)
+forecaster used in the check reproduces the evaluated model: max |difference| 0.00e+00
+training labels strictly before each refit: asserted in every refit (641 refits)
+
+done in 364 s; params -> logs/step21b_final_params.json (not committed)
+EXIT 0
