@@ -1,0 +1,41 @@
+
+==========================================================================================
+EVALUATION SET (post-reform, outside the spent test window)
+==========================================================================================
+origins: before 92 (13 Sep 16:00 -> 17 Sep 11:00 Kyiv), after 4 (11 Oct 12:00 -> 11 Oct 15:00 Kyiv)
+= 96 origins = 4.0 days of origins, on 6 calendar days; units 110
+evidence threshold 14 days -> EXPLORATORY (too few days for a clear answer)
+
+==========================================================================================
+RESULTS (macro Brier, lower is better)
+==========================================================================================
+       macro_brier  macro_logloss     ece  max_forecast  brier_+1h  brier_+6h  brier_+12h  brier_+24h
+model                                                                                                
+B4          0.1305         0.4204  0.0413        1.0000     0.1273     0.1299      0.1323      0.1320
+B6          0.1301         0.4136  0.0407        0.9999     0.1273     0.1297      0.1318      0.1316
+
+B6 vs B4 skill +0.0027, joint day-block 95 % interval [-0.0005, +0.0065] (6 day blocks)
+
+==========================================================================================
+CRITERIA (D46)
+==========================================================================================
+(1) interval above 0: False  (2) ECE not higher (0.0407 vs 0.0413): True  (3) no B6 > 0.95 where B4 <= 0.95 (3 cases): False
+-> exploratory - criteria not passed; map model for +6/+12/+24 h: B4 (unchanged)
+
+==========================================================================================
+LEAKAGE CHECK - B6 (12 units x 10 times)
+==========================================================================================
+problems: 0 
+
+==========================================================================================
+EXAMPLE - live forecast at the data cutoff, +12 h vs +24 h (profile from all post-reform data before the cutoff)
+==========================================================================================
+hour profile s(k) (logit shift; 0 = average hour): 00:-0.17 01:-0.25 02:-0.01 03:+0.10 04:+0.06 05:-0.02 06:+0.02 07:-0.00 08:+0.03 09:+0.14 10:+0.18 11:+0.14 12:+0.07 13:-0.19 14:-0.17 15:-0.01 16:+0.04 17:+0.06 18:-0.10 19:-0.06 20:+0.02 21:+0.08 22:+0.00 23:-0.05
++12 h = 13 Oct 03:00 Kyiv, +24 h = 13 Oct 15:00 Kyiv
+                                raion  B4 +12h  B4 +24h  B6 +12h  B6 +24h
+                            Kyiv City    0.354    0.354    0.377    0.352
+        Odeska oblast / Odeskyi raion    0.170    0.170    0.185    0.169
+Kharkivska oblast / Kharkivskyi raion    0.654    0.654    0.677    0.652
+      Lvivska oblast / Lvivskyi raion    0.003    0.003    0.003    0.003
+
+saved -> config/b6_logit.json

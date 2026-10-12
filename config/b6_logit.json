@@ -1,0 +1,48 @@
+{
+  "model": "B6 = sigmoid(logit(B4) + s(hour)) (D46)",
+  "half_life_days": 7,
+  "k_shrink_days": 7.0,
+  "eval_origins": 96,
+  "eval_days": 4.0,
+  "exploratory": true,
+  "criteria": {
+    "interval_above_0": false,
+    "ece_not_higher": true,
+    "over_095_cases": 3
+  },
+  "passed": false,
+  "use_on_map": false,
+  "skill_vs_B4": [
+    0.0027,
+    -0.0005,
+    0.0065
+  ],
+  "live_profile_logit": [
+    -0.1747,
+    -0.2519,
+    -0.0145,
+    0.1013,
+    0.0636,
+    -0.0168,
+    0.0177,
+    -0.0035,
+    0.0344,
+    0.1356,
+    0.183,
+    0.1414,
+    0.0744,
+    -0.1901,
+    -0.1746,
+    -0.0087,
+    0.0393,
+    0.0647,
+    -0.0985,
+    -0.0638,
+    0.0171,
+    0.0833,
+    0.0028,
+    -0.0511
+  ],
+  "chosen_at_utc": "2026-10-12T12:44:14+00:00",
+  "code_commit": "e3aa1cd"
+}
