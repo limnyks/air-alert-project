@@ -134,12 +134,12 @@ TEMPLATE = r"""<title>Raion Alert Outlook</title>
 <style>
 /* Layout: one wide map with a slim control column; replay controls under the map */
 :root{--bg:#f3f4f6;--panel:#ffffff;--ink:#1d2330;--muted:#5f6878;--line:#c9ced8;--nodata:#dfe2e8;
---p0:#e6e8ec;--p1:#f8d3c8;--p2:#f29a83;--p3:#e5523a;--p4:#c3110b;--hit:#111827;--border:#1b2230;
+--p0:#ffffff;--p1:#f8d3c8;--p2:#e3221b;--p3:#e5523a;--p4:#6b0f1a;--hit:#111827;--border:#1b2230;
 --display:"Bricolage Grotesque",Georgia,serif;--body:"IBM Plex Sans",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14171d;--panel:#1c2028;--ink:#e6e8ec;--muted:#9aa3b2;--line:#3a404c;--nodata:#2a2f39;
---p0:#2a2e36;--p1:#4f2a27;--p2:#7d2a22;--p3:#b8261b;--p4:#f01e12;--border:#f2f4f7;--hit:#f5f6f8;color-scheme:dark}}
+--p0:#ffffff;--p1:#4f2a27;--p2:#e3221b;--p3:#b8261b;--p4:#6b0f1a;--border:#f2f4f7;--hit:#f5f6f8;color-scheme:dark}}
 :root[data-theme="dark"]{--bg:#14171d;--panel:#1c2028;--ink:#e6e8ec;--muted:#9aa3b2;--line:#3a404c;--nodata:#2a2f39;
---p0:#2a2e36;--p1:#4f2a27;--p2:#7d2a22;--p3:#b8261b;--p4:#f01e12;--border:#f2f4f7;--hit:#f5f6f8;color-scheme:dark}
+--p0:#ffffff;--p1:#4f2a27;--p2:#e3221b;--p3:#b8261b;--p4:#6b0f1a;--border:#f2f4f7;--hit:#f5f6f8;color-scheme:dark}
 body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--body)}
 .wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:20px 32px;display:grid;gap:16px}
 h1{font:600 clamp(24px,3.2vw,34px)/1.1 var(--display);margin:0;text-wrap:balance}
