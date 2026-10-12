@@ -194,8 +194,8 @@ input[type=range]{width:100%}
       <g id="raions">__SHAPES__</g><g>__BORDERS__</g><g>__LABELS__</g></svg></div>
     <div class="side">
       <div class="box"><div class="k" id="legend-title">Chance of being under alert (redder = higher)</div>
-        <div class="legend"><span style="background:var(--p0)"></span><span style="background:var(--p1)"></span><span style="background:var(--p2)"></span><span style="background:var(--p3)"></span><span style="background:var(--p4)"></span></div>
-        <div class="ticks"><span>0</span><span>10%</span><span>20%</span><span>35%</span><span>50%+</span></div>
+        <div class="legend" style="display:block;height:12px;background:linear-gradient(to right,var(--p0),var(--p2),var(--p4))"></div>
+        <div class="ticks"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
         <p class="note" style="margin-top:8px"><span class="sw" style="background:var(--p3)"></span>Hatched red: near-permanent alert (&gt;80% of time), not forecast<br><span class="sw" style="background:var(--nodata)"></span>Hatched grey: no data (Crimea, Sevastopol, Luhanska, Chornobyl zone)</p>
         <p class="note" id="hit-note" hidden><span class="sw" style="background:transparent;border:2px solid var(--hit)"></span>Dark outline: an alert actually happened in the next 24 h</p></div>
       <div class="box replay" id="replay-box" hidden>
@@ -212,8 +212,10 @@ input[type=range]{width:100%}
 <div id="tip" hidden></div>
 <script>
 const DATA = __DATA__;
-const steps = [0.10, 0.20, 0.35, 0.50];
-const col = p => "var(--p" + (p < steps[0] ? 0 : p < steps[1] ? 1 : p < steps[2] ? 2 : p < steps[3] ? 3 : 4) + ")";
+// continuous, linear 0-100 %: grey -> mid red -> deep red (theme-aware via CSS colour mixing)
+const col = p => { p = Math.max(0, Math.min(1, p));
+  return p < 0.5 ? `color-mix(in oklab, var(--p2) ${(p * 200).toFixed(1)}%, var(--p0))`
+                 : `color-mix(in oklab, var(--p4) ${((p - 0.5) * 200).toFixed(1)}%, var(--p2))`; };
 const kyiv = s => new Date(s).toLocaleString("en-GB", {timeZone: "Europe/Kyiv", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit"});
 const pct = p => (100 * p).toFixed(0) + "%";
 const paths = [...document.querySelectorAll(".r.m")];
