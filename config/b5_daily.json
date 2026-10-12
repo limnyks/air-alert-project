@@ -1,0 +1,32 @@
+{
+  "model": "B5 = B4 x pooled hour-of-day profile (D45)",
+  "adopt": false,
+  "half_life_days": 7,
+  "criteria": {
+    "lower_pooled_macro_brier": true,
+    "folds_better": 4,
+    "ece_not_higher": false
+  },
+  "validation": {
+    "B2": {
+      "macro_brier": 0.086303,
+      "ece": 0.013976
+    },
+    "B4": {
+      "macro_brier": 0.085664,
+      "ece": 0.006922
+    },
+    "B5": {
+      "macro_brier": 0.085047,
+      "ece": 0.00913
+    }
+  },
+  "skill_vs_B4": [
+    0.0072,
+    0.0008,
+    0.0137
+  ],
+  "chosen_at_utc": "2026-10-12T12:26:29+00:00",
+  "code_commit": "d934bdc",
+  "note": "validation only; not tested on held-out data"
+}
