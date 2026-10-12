@@ -1,0 +1,16 @@
+{
+  "coefficients": {
+    "const": 0.19034761520503582,
+    "logit_B1": 0.05332514636385819,
+    "logit_B2": 0.67525641910414,
+    "logit_B3": 0.33650606873925787,
+    "logit_B2_x_h": -0.027161705555599557,
+    "sin_hour": 0.23844765796508724,
+    "cos_hour": 0.2689817845853803,
+    "h": -0.050700349958825504
+  },
+  "fitted_on": "validation folds 2026-05-18 -> 2026-07-13 (official)",
+  "rows_stride": 3,
+  "frozen_at_utc": "2026-10-12T10:45:16+00:00",
+  "note": "D40: frozen before the final test; inputs on the post-reform test come from a mixed 8-week window"
+}

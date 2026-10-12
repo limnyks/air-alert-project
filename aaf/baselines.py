@@ -32,12 +32,15 @@ def hour_of_week(times_ns):
     return (t.dayofweek * 24 + t.hour).to_numpy()
 
 
-def fit(hist, cut):
-    """Statistics from the 8 weeks before `cut` (ns): B1 climatology table and B2 transition table."""
+def fit(hist, cut, covered=None):
+    """Statistics from the 8 weeks before `cut` (ns): B1 climatology table and B2 transition table.
+    covered(times) -> bool array: times with data (outage / source gaps excluded); None = all covered."""
+    cov = covered or (lambda t: np.ones(len(t), bool))
     g = np.arange(cut - WEEKS8, cut, H, dtype=np.int64)
+    g = g[cov(g) & cov(g + H - 1)]
     frac = (ontime_upto(hist, g + H) - ontime_upto(hist, g)) / H
     how = hour_of_week(g)
-    clim = np.full(168, frac.mean())
+    clim = np.full(168, frac.mean() if len(frac) else 0.0)
     for w in range(168):
         if (how == w).any():
             clim[w] = frac[how == w].mean()
@@ -45,9 +48,10 @@ def fit(hist, cut):
     s0 = hist.state_at(g2)
     trans = np.zeros((2, 24))
     for j, h in enumerate(config.HORIZONS):
+        ok = cov(g2 + h * H)
         sh = hist.state_at(g2 + h * H)
         for s in (0, 1):
-            m = s0 == s
+            m = (s0 == s) & ok
             trans[s, j] = (sh[m].sum() + 1) / (m.sum() + 2)        # Laplace smoothing
     return {"clim": clim, "trans": trans}
 
