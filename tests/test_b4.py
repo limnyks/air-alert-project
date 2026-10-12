@@ -48,6 +48,18 @@ class TestB4(unittest.TestCase):
         f = lambda hist, t: bl.ewshare(hist, [t], 7, since=0)[0]
         self.assertEqual(leakage.check(f, {"u": h}, [10 * D + 5 * H, 20 * D]), [])
 
+    def test_profile_flat_and_b5_equals_b4(self):
+        h = daily([0.3] * 70)                                    # same share every hour -> flat profile
+        r = bl.day_profile([h], 70 * D)
+        self.assertTrue(np.allclose(r, 1.0))
+        self.assertTrue(np.allclose(bl.ewshare_daily(h, [70 * D], 7, r, since=0), bl.ewshare(h, [70 * D], 7, since=0)))
+
+    def test_b5_no_leakage(self):
+        h = daily(np.random.default_rng(2).uniform(0, 0.6, 70))
+        r = bl.day_profile([h], 60 * D)
+        f = lambda hist, t: bl.ewshare_daily(hist, [t], 7, r, since=0)[0]
+        self.assertEqual(leakage.check(f, {"u": h}, [61 * D + 5 * H, 65 * D]), [])
+
 
 if __name__ == "__main__":
     unittest.main()

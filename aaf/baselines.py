@@ -95,6 +95,36 @@ def ewshare(hist, origins, half_life_days, covered=None, since=None):
     return np.repeat(p[:, None], len(config.HORIZONS), axis=1)
 
 
+def hour_of_day(times_ns):
+    t = pd.DatetimeIndex(np.asarray(times_ns, dtype="datetime64[ns]")).tz_localize("UTC").tz_convert(config.TZ)
+    return t.hour.to_numpy()
+
+
+def day_profile(hists, cut, covered=None):
+    """D45: pooled hour-of-day profile r[24] from the covered hours of the 8 weeks before `cut`:
+    r[k] = sum over units of the share of time under alert in Kyiv hour k / sum over units of the overall share.
+    hists: iterable of Histories (pass .observable(cut) or full histories; only time before cut is read)."""
+    cov = covered or (lambda t: np.ones(len(t), bool))
+    g = np.arange(cut - WEEKS8, cut, H, dtype=np.int64)
+    g = g[cov(g) & cov(g + H - 1)]
+    hod = hour_of_day(g)
+    num, den = np.zeros(24), 0.0
+    for h in hists:
+        frac = (ontime_upto(h, g + H) - ontime_upto(h, g)) / H
+        num += np.array([frac[hod == k].mean() if (hod == k).any() else np.nan for k in range(24)])
+        den += frac.mean() if len(frac) else 0.0
+    r = num / den if den > 0 else np.ones(24)
+    r = np.where(np.isfinite(r), r, 1.0)
+    return r / r.mean()
+
+
+def ewshare_daily(hist, origins, half_life_days, profile, covered=None, since=None):
+    """B5 (D45): B4 level times the daily profile at each label time, capped at 1. (origins, 24)."""
+    base = ewshare(hist, origins, half_life_days, covered, since)[:, 0]
+    lt = np.asarray(origins, dtype=np.int64)[:, None] + np.asarray(config.HORIZONS, dtype=np.int64)[None, :] * H
+    return np.minimum(1.0, base[:, None] * profile[hour_of_day(lt.ravel()).reshape(lt.shape)])
+
+
 DUR_GRID = np.arange(5.0, 24 * 60 + 5, 5.0)                       # minutes; last point = 24 h
 
 
