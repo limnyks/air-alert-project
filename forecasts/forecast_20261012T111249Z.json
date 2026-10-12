@@ -1,0 +1,176 @@
+{
+  "model": "B3 (7-day rolling share; best on the post-reform test, D39)",
+  "data_up_to_utc": "2026-10-12T11:12:49+00:00",
+  "data_up_to_kyiv": "2026-10-12T14:12:49+03:00",
+  "forecast_made_utc": "2026-10-12T11:27:20+00:00",
+  "window_start_utc": "2026-10-12T12:00:00+00:00",
+  "window_end_utc": "2026-10-13T12:00:00+00:00",
+  "window_start_kyiv": "2026-10-12T15:00:00+03:00",
+  "code_commit_before_forecast": "07dfc5b",
+  "units": 119,
+  "modeled_units": 110,
+  "note": "probability that the raion is under an announced air-raid alert at any given moment in the window; same value for every hour (B3 is flat). Not a warning system - follow official alerts.",
+  "observed_last_7_days_by_oblast": [
+    {
+      "unit_name": "Cherkaska oblast",
+      "records_7d": 182.0,
+      "red_share": 0.093,
+      "median_min_red": 27.342,
+      "median_min_yellow": 47.164
+    },
+    {
+      "unit_name": "Chernihivska oblast",
+      "records_7d": 172.0,
+      "red_share": 0.081,
+      "median_min_red": 39.005,
+      "median_min_yellow": 118.488
+    },
+    {
+      "unit_name": "Chernivetska oblast",
+      "records_7d": 17.0,
+      "red_share": 0.0,
+      "median_min_red": NaN,
+      "median_min_yellow": 48.233
+    },
+    {
+      "unit_name": "Dnipropetrovska oblast",
+      "records_7d": 552.0,
+      "red_share": 0.866,
+      "median_min_red": 39.809,
+      "median_min_yellow": 47.483
+    },
+    {
+      "unit_name": "Donetska oblast",
+      "records_7d": 128.0,
+      "red_share": 0.625,
+      "median_min_red": 919.687,
+      "median_min_yellow": 20.294
+    },
+    {
+      "unit_name": "Ivano-Frankivska oblast",
+      "records_7d": 20.0,
+      "red_share": 0.1,
+      "median_min_red": 27.425,
+      "median_min_yellow": 30.1
+    },
+    {
+      "unit_name": "Kharkivska oblast",
+      "records_7d": 596.0,
+      "red_share": 0.508,
+      "median_min_red": 50.219,
+      "median_min_yellow": 37.204
+    },
+    {
+      "unit_name": "Khersonska oblast",
+      "records_7d": 58.0,
+      "red_share": 0.172,
+      "median_min_red": 19.176,
+      "median_min_yellow": 35.844
+    },
+    {
+      "unit_name": "Khmelnytska oblast",
+      "records_7d": 100.0,
+      "red_share": 0.0,
+      "median_min_red": NaN,
+      "median_min_yellow": 34.906
+    },
+    {
+      "unit_name": "Kirovohradska oblast",
+      "records_7d": 309.0,
+      "red_share": 0.1,
+      "median_min_red": 26.662,
+      "median_min_yellow": 61.581
+    },
+    {
+      "unit_name": "Kyiv City",
+      "records_7d": 49.0,
+      "red_share": 0.061,
+      "median_min_red": 38.931,
+      "median_min_yellow": 50.833
+    },
+    {
+      "unit_name": "Kyivska oblast",
+      "records_7d": 348.0,
+      "red_share": 0.06,
+      "median_min_red": 38.924,
+      "median_min_yellow": 76.263
+    },
+    {
+      "unit_name": "Lvivska oblast",
+      "records_7d": 16.0,
+      "red_share": 0.0,
+      "median_min_red": NaN,
+      "median_min_yellow": 26.392
+    },
+    {
+      "unit_name": "Mykolaivska oblast",
+      "records_7d": 266.0,
+      "red_share": 0.023,
+      "median_min_red": 23.684,
+      "median_min_yellow": 33.913
+    },
+    {
+      "unit_name": "Odeska oblast",
+      "records_7d": 180.0,
+      "red_share": 0.028,
+      "median_min_red": 59.726,
+      "median_min_yellow": 29.205
+    },
+    {
+      "unit_name": "Poltavska oblast",
+      "records_7d": 197.0,
+      "red_share": 0.117,
+      "median_min_red": 39.008,
+      "median_min_yellow": 44.102
+    },
+    {
+      "unit_name": "Rivnenska oblast",
+      "records_7d": 124.0,
+      "red_share": 0.0,
+      "median_min_red": NaN,
+      "median_min_yellow": 29.153
+    },
+    {
+      "unit_name": "Sumska oblast",
+      "records_7d": 264.0,
+      "red_share": 0.545,
+      "median_min_red": 45.992,
+      "median_min_yellow": 45.967
+    },
+    {
+      "unit_name": "Ternopilska oblast",
+      "records_7d": 96.0,
+      "red_share": 0.0,
+      "median_min_red": NaN,
+      "median_min_yellow": 19.443
+    },
+    {
+      "unit_name": "Vinnytska oblast",
+      "records_7d": 211.0,
+      "red_share": 0.114,
+      "median_min_red": 38.96,
+      "median_min_yellow": 32.248
+    },
+    {
+      "unit_name": "Volynska oblast",
+      "records_7d": 50.0,
+      "red_share": 0.0,
+      "median_min_red": NaN,
+      "median_min_yellow": 20.693
+    },
+    {
+      "unit_name": "Zaporizka oblast",
+      "records_7d": 249.0,
+      "red_share": 0.482,
+      "median_min_red": 174.458,
+      "median_min_yellow": 90.813
+    },
+    {
+      "unit_name": "Zhytomyrska oblast",
+      "records_7d": 156.0,
+      "red_share": 0.103,
+      "median_min_red": 38.951,
+      "median_min_yellow": 41.863
+    }
+  ]
+}

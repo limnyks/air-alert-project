@@ -26,6 +26,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 ENV_FILE = ROOT / ".env"
 OUT_ROOT = ROOT / "data" / "raw" / "alerts_in_ua"
+if "--live" in sys.argv:   # D42: fresh snapshot for the live map; kept apart from the frozen evaluation snapshot
+    OUT_ROOT = ROOT / "data" / "raw" / "alerts_in_ua_live"
 URL = "https://api.alerts.in.ua/v1/regions/{uid}/alerts/month_ago.json"
 WAIT_SECONDS = 35        # > 30 s keeps us under 2 history requests per minute
 RETRY_WAIT_SECONDS = 65  # after a 429
