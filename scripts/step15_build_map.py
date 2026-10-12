@@ -77,19 +77,12 @@ def main():
         adm1 = json.load(io.TextIOWrapper(z.open("ukr_admin1.geojson"), encoding="utf-8"))["features"]
     proj, height = project_all(adm1)
 
-    # replay: 22 test days, forecast at 06:00 Kyiv (03:00 UTC), outcome = next 24 h
+    # past days (step23): the final model's forecasts vs what really happened
     units = fc["unit"].tolist()
-    off, aic = load_histories("official", units), load_histories("alerts_in_ua", units)
-    comb = {u: combined_history(off[u], aic[u]) for u in units}
-    days = pd.date_range("2026-09-19 03:00", "2026-10-10 03:00", freq="D", tz="UTC")
-    H, D = config.HOUR_NS, 24 * config.HOUR_NS
-    replay = {"days": [d.tz_convert(config.TZ).strftime("%d %b") for d in days], "units": {}}
-    for _, r in fc.iterrows():
-        h = comb[r["unit"]]
-        t = np.array([ns(d) for d in days], dtype=np.int64)
-        p = (ontime_upto(h, t) - ontime_upto(h, t - 7 * D)) / (7 * D)
-        actual = (ontime_upto(h, t + D) - ontime_upto(h, t)) / D
-        replay["units"][r["hdx_pcode"]] = {"p": np.round(p, 3).tolist(), "a": np.round(actual, 3).tolist()}
+    pj = json.loads((config.ROOT / "forecasts" / "past_days.json").read_text())
+    pc_of = dict(zip(fc["unit"], fc["hdx_pcode"]))
+    past = {"pcs": [pc_of[u] for u in pj["units"]], "base_utc": pj["base_utc"], "origins": pj["origins"], "p": pj["p"],
+            "actual": {pc_of[u]: v for u, v in pj["actual"].items()}, "n_hours": pj["n_hours"]}
     adm2_obl = {f["properties"]["adm2_pcode"]: f["properties"]["adm1_pcode"] for f in adm2}
 
     info = {r["hdx_pcode"]: {"name": r["raion_uk"] if isinstance(r["raion_uk"], str) else "Київ", "p": [round(float(r[f"p_{h}h"]), 3) if pd.notna(r[f"p_{h}h"]) else None for h in range(1, 25)],
@@ -106,9 +99,6 @@ def main():
         o = {"name": f["properties"]["adm1_name1"], "n": len(mods), "n_all": n_all}
         if mods:
             o["p"] = np.round(np.mean([info[pc]["p"] for pc in mods], axis=0), 3).tolist()
-            o["rp"] = np.round(np.mean([replay["units"][pc]["p"] for pc in mods], axis=0), 3).tolist()
-            o["ra"] = np.round(np.mean([replay["units"][pc]["a"] for pc in mods], axis=0), 3).tolist()
-            o["rhit"] = [int(sum(replay["units"][pc]["a"][d] > 0 for pc in mods)) for d in range(len(days))]
         obl[op] = o
     def center(f):
         pr = f["properties"]
@@ -129,7 +119,7 @@ def main():
     borders = "".join(f'<path class="obh" d="{d}"/>' for d in bd) + "".join(f'<path class="ob" d="{d}"/>' for d in bd)
     mix = {m["unit_name"]: m for m in meta.get("observed_last_7_days_by_oblast", [])}
     page = TEMPLATE.replace("__H__", f"{height:.0f}").replace("__SHAPES__", "".join(shapes)).replace("__BORDERS__", borders).replace("__LABELS__", labels)
-    page = page.replace("__DATA__", json.dumps({"info": info, "obl": obl, "replay": replay, "meta": meta, "mix": mix}, ensure_ascii=False))
+    page = page.replace("__DATA__", json.dumps({"info": info, "obl": obl, "past": past, "meta": meta, "mix": mix}, ensure_ascii=False))
     OUT.parent.mkdir(exist_ok=True)
     OUT.write_text(page, encoding="utf-8")
     # GitHub Pages copy: a full document, system fonts only (no external requests)
@@ -167,7 +157,13 @@ svg{width:100%;height:auto;display:block}
 .lvl-oblast .r{stroke-width:0}
 .r.nd{fill:url(#hatch-nd)}.r.ex{fill:url(#hatch-ex)}
 .r:hover,.r:focus{stroke:var(--ink);stroke-width:1.4}
-.r.hit{stroke:var(--hit);stroke-width:1.6}
+.grid.pair{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.grid.pair .side{grid-column:1/-1;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+@media (max-width:860px){.grid.pair{grid-template-columns:minmax(0,1fr)}}
+.mt{padding:4px 6px 8px}
+.prow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+select{font:500 14px var(--body);padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
+.tabs button:disabled{opacity:.35;cursor:default}
 .ob,.obh{fill:none;stroke-linejoin:round;pointer-events:none}
 .obh{stroke:var(--halo);stroke-width:4.2}
 .ob{stroke:var(--border);stroke-width:1.9}
@@ -198,35 +194,39 @@ input[type=range]{width:100%}
   <p class="sub" id="sub"></p></div>
   <div class="tabs" role="group" aria-label="View">
     <button id="tab-live" aria-pressed="true">Forecast</button>
-    <button id="tab-replay" aria-pressed="false">Replay: test days</button>
+    <button id="tab-past" aria-pressed="false">Past days: forecast vs real</button>
+  </div>
+  <div class="box future" id="past-box" hidden>
+    <label class="k" for="pday">Forecast made on (Kyiv time)</label>
+    <div class="prow"><select id="pday"></select>
+      <div class="tabs" id="pmade" role="group" aria-label="Made at"><button id="pm-0">06:00</button><button id="pm-1">12:00</button><button id="pm-2">18:00</button></div></div>
   </div>
   <div class="box future" id="hz-tabs">
-    <label class="k" for="hz">Forecast: chance of an alert in the next hours</label>
+    <label class="k" for="hz" id="hz-title">Forecast: chance of an alert in the next hours</label>
     <input type="range" id="hz" min="0" max="23" step="1" value="0" aria-valuetext="+1 hour">
     <div class="ticks hzt"><span>+1 h</span><span>+6 h</span><span>+12 h</span><span>+18 h</span><span>+24 h</span></div>
     <div class="v" id="hz-label"></div>
   </div>
-  <div class="tabs" role="group" aria-label="Level">
+  <div class="tabs" role="group" aria-label="Level" id="lvl-box">
     <button id="lvl-raion" aria-pressed="true">Raions</button>
     <button id="lvl-oblast" aria-pressed="false">Oblasts</button>
   </div>
-  <div class="grid">
-    <div class="map"><svg viewBox="0 0 1000 __H__" role="img" aria-label="Map of Ukrainian raions coloured by alert probability">
+  <div class="grid" id="grid">
+    <div class="map" id="map1"><div class="k mt" id="mt1" hidden>Our forecast</div><svg viewBox="0 0 1000 __H__" role="img" aria-label="Map of Ukrainian raions coloured by alert probability">
       <defs>
         <pattern id="hatch-nd" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="var(--nodata)"/><line x1="0" y1="0" x2="0" y2="6" stroke="var(--line)" stroke-width="2"/></pattern>
         <pattern id="hatch-ex" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="var(--p3)"/><line x1="0" y1="0" x2="0" y2="6" stroke="var(--p4)" stroke-width="3"/></pattern>
       </defs>
       <g id="raions">__SHAPES__</g><g>__BORDERS__</g></svg></div>
+    <div class="map" id="map2" hidden><div class="k mt">What really happened</div></div>
     <div class="side">
       <div class="box"><div class="k" id="legend-title">Chance of being under alert (redder = higher)</div>
         <div class="legend" style="display:block;height:12px;background:linear-gradient(to right,var(--p0),var(--p2),var(--p4))"></div>
         <div class="ticks"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
         <p class="note" style="margin-top:8px"><span class="sw" style="background:var(--p3)"></span>Hatched red: near-permanent alert (&gt;80% of time), not forecast<br><span class="sw" style="background:var(--nodata)"></span>Hatched grey: no data (Crimea, Sevastopol, Luhanska, Chornobyl zone)</p>
-        <p class="note" id="hit-note" hidden><span class="sw" style="background:transparent;border:2px solid var(--hit)"></span>Dark outline: an alert actually happened in the next 24 h</p></div>
-      <div class="box replay" id="replay-box" hidden>
-        <label class="k" for="day">Forecast made at 06:00 Kyiv, <span id="day-label"></span></label>
-        <input type="range" id="day" min="0" max="21" value="0">
-        <div class="v" id="day-stats"></div></div>
+        <p class="note" id="past-legend" style="margin-top:8px" hidden>Right map: <span class="sw" style="background:var(--p2)"></span>under alert &nbsp;<span class="sw" style="background:var(--p0)"></span>no alert &nbsp;<span class="sw" style="background:var(--nodata)"></span>not known yet</p></div>
+      <div class="box" id="past-stats" hidden><div class="k">This hour</div><div class="v" id="pstats"></div>
+        <p class="note" style="margin-top:8px">The model is refit before every forecast using only earlier data. Its settings were chosen on 2025 data, so these days are a later check, not an untouched test.</p></div>
       <div class="box"><div class="k">Data and model</div><div class="v" id="meta"></div></div>
       <div class="box warn"><p class="note">Research project, not a warning system. Always follow official air-raid alerts. Probabilities refer to announced alerts, not to attacks.</p></div>
     </div>
@@ -235,71 +235,100 @@ input[type=range]{width:100%}
 <div id="tip" hidden></div>
 <script>
 const DATA = __DATA__;
-// continuous, linear 0-100 %: grey -> mid red -> deep red (theme-aware via CSS colour mixing)
+// continuous, linear 0-100 %: white -> red -> burgundy (theme-aware via CSS colour mixing)
 const col = p => { p = Math.max(0, Math.min(1, p));
   return p < 0.5 ? `color-mix(in oklab, var(--p2) ${(p * 200).toFixed(1)}%, var(--p0))`
                  : `color-mix(in oklab, var(--p4) ${((p - 0.5) * 200).toFixed(1)}%, var(--p2))`; };
 const kyiv = s => new Date(s).toLocaleString("en-GB", {timeZone: "Europe/Kyiv", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit"});
 const pct = p => (100 * p).toFixed(0) + "%";
-const paths = [...document.querySelectorAll(".r.m")];
-const m = DATA.meta;
-const sub = () => document.getElementById("sub").textContent = mode === "live"
-  ? "Data up to " + kyiv(m.data_up_to_utc) + " Kyiv time. Chance of an alert at " + kyiv(m.target_times_utc[hz]) + " (" + HZ[hz] + ")."
-  : "Replay of the 22 post-reform test days: B3 forecast at 06:00 Kyiv vs what happened in the next 24 h.";
-document.getElementById("meta").innerHTML = "data up to: " + kyiv(m.data_up_to_utc) + "<br>forecast made: " + kyiv(m.forecast_made_utc) + "<br>raions forecast: " + m.modeled_units + "<br>code commit: " + m.code_commit_before_forecast;
-let mode = "live", day = 0, level = "raion", hz = 0;
-const val = (o) => o.p[hz];
 const HZ = Array.from({length: 24}, (_, k) => "+" + (k + 1) + "h");
-const svg = document.querySelector(".map svg");
-function draw() {
-  let hits = 0, sumP = 0, sumA = 0, n = 0;
-  for (const el of paths) {
-    const pc = el.dataset.pc, i = DATA.info[pc];
-    let p = val(i), hit = false;
-    if (mode === "replay") { const r = DATA.replay.units[pc]; p = r.p[day]; hit = r.a[day] > 0; sumP += p; sumA += r.a[day]; n++; if (hit) hits++; }
-    if (level === "oblast") { const o = DATA.obl[i.op]; p = mode === "replay" ? o.rp[day] : val(o); hit = false; }
-    el.style.fill = col(p); el.classList.toggle("hit", hit);
-  }
-  sub();
-  document.getElementById("hz-label").textContent = HZ[hz] + " = " + kyiv(m.target_times_utc[hz]) + " Kyiv time";
-  document.getElementById("hz-tabs").hidden = mode !== "live";
-  document.getElementById("hit-note").hidden = mode !== "replay";
-  document.getElementById("replay-box").hidden = mode !== "replay";
-  if (mode === "replay") {
-    document.getElementById("day-label").textContent = DATA.replay.days[day];
-    document.getElementById("day-stats").innerHTML = "raions with an alert in the next 24 h: " + hits + " of " + n + "<br>mean forecast " + pct(sumP / n) + " vs actual share of time " + pct(sumA / n);
-  }
+const HZTXT = HZ.map(h => h.replace("h", " hours").replace("+1 hours", "+1 hour"));
+const m = DATA.meta, PD = DATA.past;
+const svg = document.querySelector("#map1 svg");
+const svg2 = svg.cloneNode(true);                       // second map: what really happened
+svg2.querySelector("defs").remove();                    // hatch patterns are defined once, in the first svg
+svg2.querySelector("#raions").id = "raions2";
+svg2.setAttribute("aria-label", "Map of raions that were really under alert");
+document.getElementById("map2").appendChild(svg2);
+const paths = [...svg.querySelectorAll(".r.m")], paths2 = [...svg2.querySelectorAll(".r.m")];
+let mode = "live", level = "raion", hz = 0, pdi = 0, pmi = 0;
+const val = o => o.p[hz];
+
+// past days: forecast origins (06:00 / 12:00 / 18:00 Kyiv), forecasts in %, real alert flags per hour
+const MADE = [6, 12, 18], baseMs = Date.parse(PD.base_utc);
+const fmt = new Intl.DateTimeFormat("en-GB", {timeZone: "Europe/Kyiv", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", hourCycle: "h23"});
+const parts = ms => { const f = fmt.formatToParts(new Date(ms)), g = t => f.find(x => x.type === t).value; return {date: g("year") + "-" + g("month") + "-" + g("day"), hour: +g("hour")}; };
+const org = PD.origins.map((off, k) => Object.assign({k, off, ms: baseMs + off * 3600e3}, parts(baseMs + off * 3600e3)));
+const days = [...new Set(org.map(o => o.date))];
+const originFor = (di, mi) => org.find(o => o.date === days[di] && o.hour === MADE[mi]);
+const pidx = Object.fromEntries(PD.pcs.map((pc, i) => [pc, i]));
+const pday = document.getElementById("pday");
+days.forEach((d, i) => pday.add(new Option(new Date(d + "T12:00:00Z").toLocaleDateString("en-GB", {weekday: "short", day: "2-digit", month: "short", timeZone: "UTC"}), i)));
+{ const last = org[org.length - 1]; pdi = days.indexOf(last.date); pmi = MADE.indexOf(last.hour); pday.value = pdi; }
+function pastVals(pc) {
+  const o = originFor(pdi, pmi), ui = pidx[pc];
+  if (!o || ui === undefined) return null;
+  const ch = PD.actual[pc][o.off + hz + 1];
+  return {p: PD.p[o.k][ui][hz] / 100, a: ch === "1" ? 1 : ch === "0" ? 0 : null};
 }
+function draw() {
+  const past = mode === "past", lv = past ? "raion" : level;
+  svg.classList.toggle("lvl-oblast", lv === "oblast");
+  document.getElementById("grid").classList.toggle("pair", past);
+  for (const id of ["map2", "mt1", "past-box", "past-stats", "past-legend"]) document.getElementById(id).hidden = !past;
+  document.getElementById("lvl-box").hidden = past;
+  document.getElementById("hz-title").textContent = past ? "Hours after the forecast was made" : "Forecast: chance of an alert in the next hours";
+  if (!past) {
+    for (const el of paths) { const i = DATA.info[el.dataset.pc]; el.style.fill = col(lv === "oblast" ? val(DATA.obl[i.op]) : val(i)); }
+    document.getElementById("sub").textContent = "Data up to " + kyiv(m.data_up_to_utc) + " Kyiv time. Chance of an alert at " + kyiv(m.target_times_utc[hz]) + " (" + HZ[hz] + ").";
+    document.getElementById("hz-label").textContent = HZ[hz] + " = " + kyiv(m.target_times_utc[hz]) + " Kyiv time";
+    return;
+  }
+  const o = originFor(pdi, pmi);
+  for (let b = 0; b < 3; b++) { const el = document.getElementById("pm-" + b); el.disabled = !originFor(pdi, b); el.setAttribute("aria-pressed", String(b === pmi)); }
+  const target = o.ms + (hz + 1) * 3600e3;
+  let nA = 0, nN = 0, sA = 0, sN = 0;
+  paths.forEach((el, q) => {
+    const v = pastVals(el.dataset.pc);
+    if (!v) { el.style.fill = paths2[q].style.fill = "var(--nodata)"; return; }
+    el.style.fill = col(v.p);
+    paths2[q].style.fill = v.a === null ? "var(--nodata)" : v.a ? "var(--p2)" : "var(--p0)";
+    if (v.a === 1) { nA++; sA += v.p; } else if (v.a === 0) { nN++; sN += v.p; }
+  });
+  document.getElementById("sub").textContent = "Forecast made " + kyiv(o.ms) + " Kyiv time. Left: our forecast for " + kyiv(target) + " (" + HZ[hz] + "). Right: what really happened at that hour.";
+  document.getElementById("hz-label").textContent = HZ[hz] + " after the forecast = " + kyiv(target) + " Kyiv time";
+  document.getElementById("pstats").innerHTML = (nA + nN) === 0
+    ? "Not known yet (the data ends " + kyiv(m.data_up_to_utc) + ")."
+    : "raions under alert: " + nA + " of " + (nA + nN) + "<br>average forecast for them: " + (nA ? pct(sA / nA) : "-") + "<br>average forecast for the others: " + (nN ? pct(sN / nN) : "-");
+}
+document.getElementById("meta").innerHTML = "data up to: " + kyiv(m.data_up_to_utc) + "<br>forecast made: " + kyiv(m.forecast_made_utc) + "<br>raions forecast: " + m.modeled_units + "<br>code commit: " + m.code_commit_before_forecast;
 for (const [id, lv] of [["lvl-raion", "raion"], ["lvl-oblast", "oblast"]]) {
-  document.getElementById(id).addEventListener("click", () => { level = lv; svg.classList.toggle("lvl-oblast", lv === "oblast");
+  document.getElementById(id).addEventListener("click", () => { level = lv;
     for (const b of document.querySelectorAll('[aria-label="Level"] button')) b.setAttribute("aria-pressed", String(b.id === id)); draw(); });
 }
-for (const [id, md] of [["tab-live", "live"], ["tab-replay", "replay"]]) {
+for (const [id, md] of [["tab-live", "live"], ["tab-past", "past"]]) {
   document.getElementById(id).addEventListener("click", () => { mode = md; for (const b of document.querySelectorAll('[aria-label="View"] button')) b.setAttribute("aria-pressed", String(b.id === id)); draw(); });
 }
-const HZTXT = HZ.map(h => h.replace("h", " hours").replace("+1 hours", "+1 hour"));
 document.getElementById("hz").addEventListener("input", e => { hz = +e.target.value; e.target.setAttribute("aria-valuetext", HZTXT[hz]); draw(); });
-document.getElementById("day").addEventListener("input", e => { day = +e.target.value; draw(); });
+pday.addEventListener("change", () => { pdi = +pday.value; if (!originFor(pdi, pmi)) pmi = [0, 1, 2].find(b => originFor(pdi, b)); draw(); });
+for (let b = 0; b < 3; b++) document.getElementById("pm-" + b).addEventListener("click", () => { pmi = b; draw(); });
 const tip = document.getElementById("tip");
-document.getElementById("raions").addEventListener("mousemove", e => {
+function hover(e) {
   const el = e.target.closest(".r"); if (!el) { tip.hidden = true; return; }
-  const pc = el.dataset.pc, i = DATA.info[pc];
+  const pc = el.dataset.pc, i = DATA.info[pc], past = mode === "past";
   let txt = el.dataset.label;
   const o = DATA.obl[el.dataset.op];
-  if (level === "oblast" && o) {
+  if (!past && level === "oblast" && o) {
     txt = "<b>" + o.name + "</b>";
     if (!o.n) txt += "<br>all raions near-permanent alert";
-    else if (mode === "live") txt += "<br>average chance of alert at " + HZ[hz] + ": <b>" + pct(val(o)) + "</b><br>(= expected share of its " + o.n + " forecast raions)";
-    else txt += "<br>forecast " + pct(o.rp[day]) + " · actual " + pct(o.ra[day]) + "<br>raions with an alert: " + o.rhit[day] + " of " + o.n;
-    tip.innerHTML = txt; tip.hidden = false; tip.style.left = (e.clientX + 14) + "px"; tip.style.top = (e.clientY + 14) + "px"; return;
-  }
-  if (el.classList.contains("nd")) txt += "<br>no data";
+    else txt += "<br>average chance of alert at " + HZ[hz] + ": <b>" + pct(val(o)) + "</b><br>(= expected share of its " + o.n + " forecast raions)";
+  } else if (el.classList.contains("nd")) txt += "<br>no data";
   else if (i && i.ex) txt += "<br>near-permanent alert, not forecast";
-  else if (mode === "live") txt += "<br>chance of alert at " + kyiv(m.target_times_utc[hz]) + ": <b>" + pct(val(i)) + "</b>" + (i.now ? "<br>alert running at the data time" : "");
-  else { const r = DATA.replay.units[pc]; txt += "<br>forecast " + pct(r.p[day]) + " · actual " + pct(r.a[day]) + " of the next 24 h"; }
+  else if (!past) txt += "<br>chance of alert at " + kyiv(m.target_times_utc[hz]) + ": <b>" + pct(val(i)) + "</b>" + (i.now ? "<br>alert running at the data time" : "");
+  else { const v = pastVals(pc); if (v) txt += "<br>forecast: <b>" + pct(v.p) + "</b><br>real: <b>" + (v.a === null ? "not known yet" : v.a ? "under alert" : "no alert") + "</b>"; }
   tip.innerHTML = txt; tip.hidden = false; tip.style.left = (e.clientX + 14) + "px"; tip.style.top = (e.clientY + 14) + "px";
-});
-document.getElementById("raions").addEventListener("mouseleave", () => tip.hidden = true);
+}
+for (const id of ["raions", "raions2"]) { const g = document.getElementById(id); g.addEventListener("mousemove", hover); g.addEventListener("mouseleave", () => tip.hidden = true); }
 draw();
 </script>
 """

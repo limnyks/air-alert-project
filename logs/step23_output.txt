@@ -1,0 +1,8 @@
+[load_histories official] dropped 0 episodes starting after the snapshot cutoff, 1 zero-length episodes
+snapshot 20261012T163223Z; origins 89 (13 Sep 06:00 -> 12 Oct 12:00 Kyiv), raions 110
+training pool 3,008,280 rows
+89 refits, each on labels strictly before its origin
+saved -> forecasts/past_days.json (0.72 MB)
+known outcomes shown: 2106 (origin, hour) maps x 110 raions
+Brier 0.1227; mean forecast where an alert happened 0.480, where not 0.162; alert rate 0.242
+reliability (forecast bin: mean forecast / observed / n): 0.0: 0.05/0.03/95562; 0.1: 0.15/0.16/36511; 0.2: 0.25/0.27/28689; 0.3: 0.35/0.37/20125; 0.4: 0.45/0.45/14547; 0.5: 0.55/0.55/11883; 0.6: 0.65/0.64/8602; 0.7: 0.75/0.76/5377; 0.8: 0.86/0.90/8703; 0.9: 0.91/0.93/1661
