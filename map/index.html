@@ -91,11 +91,9 @@ input[type=range]{width:100%}
         <input type="range" id="day" min="0" max="21" value="0">
         <div class="v" id="day-stats"></div></div>
       <div class="box"><div class="k">Data and model</div><div class="v" id="meta"></div></div>
-      <div class="box" id="mix-box"><div class="k">Observed last 7 days (alerts.in.ua)</div><div class="v" id="mix">Hover an oblast's raion</div></div>
       <div class="box warn"><p class="note">Research project, not a warning system. Always follow official air-raid alerts. Probabilities refer to announced alerts, not to attacks.</p></div>
     </div>
   </div>
-  <p class="note">Forecast = chance that the raion is under an announced air-raid alert at that exact hour. Final model: log-odds(chance) = log-odds(raion's recent level, a week ago counts half) + hour-of-day shift (one national pattern, recent month weighted most) + effect of an alert running now (strong for the next hours, fading). Checked day by day on 2026 (each day learns only from earlier days): 0.9% lower error than a flat level [0.6%, 1.3%]; the gain is in the first ~6 hours; on the most recent weeks there is no evidence of a difference. The replay shows B3 (7-day share), the model tested once on the 22 post-reform days. Shapes: HDX COD-AB (Kartographia, CC BY-IGO). Alerts: official dataset (Vadimkin, from the official Telegram channel) and alerts.in.ua.</p>
 </div>
 <div id="tip" hidden></div>
 <script>
@@ -163,9 +161,6 @@ document.getElementById("raions").addEventListener("mousemove", e => {
   else if (mode === "live") txt += "<br>chance of alert at " + kyiv(m.target_times_utc[hz]) + ": <b>" + pct(val(i)) + "</b>" + (i.now ? "<br>alert running at the data time" : "");
   else { const r = DATA.replay.units[pc]; txt += "<br>forecast " + pct(r.p[day]) + " · actual " + pct(r.a[day]) + " of the next 24 h"; }
   tip.innerHTML = txt; tip.hidden = false; tip.style.left = (e.clientX + 14) + "px"; tip.style.top = (e.clientY + 14) + "px";
-  const mx = i && DATA.mix[i.obl];
-  document.getElementById("mix").innerHTML = mx ? i.obl + "<br>alert records: " + mx.records_7d + "<br>red level: " + pct(mx.red_share) +
-    "<br>median length: red " + Math.round(mx.median_min_red) + " min · yellow " + Math.round(mx.median_min_yellow) + " min" : "no data";
 });
 document.getElementById("raions").addEventListener("mouseleave", () => tip.hidden = true);
 draw();
