@@ -1,0 +1,9 @@
+live snapshot 20261012T120011Z: 24/24 units OK
+data up to: 2026-10-12T15:00:11+03:00 (Kyiv); targets: +1h 16:00 12 Oct, +6h 21:00 12 Oct, +24h 15:00 13 Oct
+modeled units: 110; under alert at cutoff: 43
+       p_1h   p_6h  p_24h  b3_ref
+mean  0.283  0.252  0.252   0.266
+50%   0.224  0.190  0.190   0.208
+min   0.003  0.000  0.000   0.000
+max   0.918  0.920  0.920   0.933
+saved -> forecasts/horizons_20261012T120011Z.csv and .json  -> COMMIT NOW, before 2026-10-12T13:00:11+00:00
