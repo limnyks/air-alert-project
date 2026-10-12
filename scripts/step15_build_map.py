@@ -169,6 +169,8 @@ svg{width:100%;height:auto;display:block}
 .sw{display:inline-block;width:14px;height:12px;vertical-align:-2px;margin-right:6px;border:1px solid var(--line)}
 #tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--panel);padding:6px 9px;border-radius:6px;font:13px/1.35 var(--body);max-width:260px}
 .replay{display:grid;gap:6px}
+.future{display:grid;gap:6px;max-width:520px}
+.hzt{font:500 13px var(--body);color:var(--ink)}
 input[type=range]{width:100%}
 .note{color:var(--muted);font-size:13px;margin:0}
 .warn{border-left:3px solid var(--p3);padding-left:10px}
@@ -182,10 +184,11 @@ input[type=range]{width:100%}
     <button id="tab-live" aria-pressed="true">Forecast</button>
     <button id="tab-replay" aria-pressed="false">Replay: test days</button>
   </div>
-  <div class="tabs" role="group" aria-label="Hours ahead" id="hz-tabs">
-    <button id="hz-0" aria-pressed="true">+1 hour</button>
-    <button id="hz-1" aria-pressed="false">+6 hours</button>
-    <button id="hz-2" aria-pressed="false">+24 hours</button>
+  <div class="box future" id="hz-tabs">
+    <label class="k" for="hz">Forecast: chance of an alert in</label>
+    <input type="range" id="hz" min="0" max="2" step="1" value="0" aria-valuetext="1 hour">
+    <div class="ticks hzt"><span>1 hour</span><span>6 hours</span><span>24 hours</span></div>
+    <div class="v" id="hz-label"></div>
   </div>
   <div class="tabs" role="group" aria-label="Level">
     <button id="lvl-raion" aria-pressed="true">Raions</button>
@@ -243,6 +246,7 @@ function draw() {
     el.style.fill = col(p); el.classList.toggle("hit", hit);
   }
   sub();
+  document.getElementById("hz-label").textContent = "at " + kyiv(m.target_times_utc[HZ[hz]]) + " Kyiv time · model: " + (hz === 0 ? "B2 (persistence)" : "B4 (weighted share, half-life 7 days)");
   document.getElementById("hz-tabs").hidden = mode !== "live";
   document.getElementById("hit-note").hidden = mode !== "replay";
   document.getElementById("replay-box").hidden = mode !== "replay";
@@ -258,8 +262,8 @@ for (const [id, lv] of [["lvl-raion", "raion"], ["lvl-oblast", "oblast"]]) {
 for (const [id, md] of [["tab-live", "live"], ["tab-replay", "replay"]]) {
   document.getElementById(id).addEventListener("click", () => { mode = md; for (const b of document.querySelectorAll('[aria-label="View"] button')) b.setAttribute("aria-pressed", String(b.id === id)); draw(); });
 }
-for (let k = 0; k < 3; k++) document.getElementById("hz-" + k).addEventListener("click", () => { hz = k;
-  for (let j = 0; j < 3; j++) document.getElementById("hz-" + j).setAttribute("aria-pressed", String(j === k)); draw(); });
+const HZTXT = ["1 hour", "6 hours", "24 hours"];
+document.getElementById("hz").addEventListener("input", e => { hz = +e.target.value; e.target.setAttribute("aria-valuetext", HZTXT[hz]); draw(); });
 document.getElementById("day").addEventListener("input", e => { day = +e.target.value; draw(); });
 const tip = document.getElementById("tip");
 document.getElementById("raions").addEventListener("mousemove", e => {
