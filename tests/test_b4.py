@@ -60,6 +60,26 @@ class TestB4(unittest.TestCase):
         f = lambda hist, t: bl.ewshare_daily(hist, [t], 7, r, since=0)[0]
         self.assertEqual(leakage.check(f, {"u": h}, [61 * D + 5 * H, 65 * D]), [])
 
+    def test_b6_zero_profile_equals_b4_and_stays_below_one(self):
+        h = daily([0.3] * 40)
+        b4 = bl.ewshare(h, [40 * D], 7, since=0)
+        self.assertTrue(np.allclose(bl.ewshare_logit(h, [40 * D], 7, np.zeros(24), since=0), b4, atol=1e-6))
+        hot = daily([0.97] * 40)
+        p = bl.ewshare_logit(hot, [40 * D], 7, np.full(24, 2.0), since=0)
+        self.assertTrue((p < 1).all())
+
+    def test_b6_profile_flat_data_is_zero_and_shrinks(self):
+        h = daily([0.3] * 20)
+        self.assertTrue(np.allclose(bl.logit_hour_profile([h], 0, 20 * D), 0, atol=1e-9))
+        s = np.zeros(1)
+        self.assertEqual(bl.logit_hour_profile([h], 0, 0).tolist(), [0.0] * 24)
+
+    def test_b6_no_leakage(self):
+        h = daily(np.random.default_rng(3).uniform(0, 0.6, 40))
+        prof = bl.logit_hour_profile([h], 0, 30 * D)
+        f = lambda hist, t: bl.ewshare_logit(hist, [t], 7, prof, since=0)[0]
+        self.assertEqual(leakage.check(f, {"u": h}, [31 * D + 5 * H, 35 * D]), [])
+
 
 if __name__ == "__main__":
     unittest.main()

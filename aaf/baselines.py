@@ -125,6 +125,37 @@ def ewshare_daily(hist, origins, half_life_days, profile, covered=None, since=No
     return np.minimum(1.0, base[:, None] * profile[hour_of_day(lt.ravel()).reshape(lt.shape)])
 
 
+def _logit(p):
+    p = np.clip(p, 1e-4, 1 - 1e-4)
+    return np.log(p / (1 - p))
+
+
+def logit_hour_profile(hists, a, b, k_shrink=7.0, covered=None):
+    """D46: s[24] on the logit scale from the hours in [a, b) (ns), pooled over `hists`:
+    s[k] = w * (logit(pooled share in Kyiv hour k) - logit(pooled overall share)), w = n / (n + k_shrink),
+    n = days of data used. Only time before b is read. Returns zeros if there is no data."""
+    cov = covered or (lambda t: np.ones(len(t), bool))
+    g = np.arange(a, b - H + 1, H, dtype=np.int64)
+    g = g[cov(g) & cov(g + H - 1)]
+    if len(g) == 0:
+        return np.zeros(24)
+    frac = np.mean([(ontime_upto(h, g + H) - ontime_upto(h, g)) / H for h in hists], axis=0)
+    hod = hour_of_day(g)
+    if frac.mean() <= 0 or any(not (hod == k).any() for k in range(24)):
+        return np.zeros(24)
+    raw = np.array([_logit(frac[hod == k].mean()) for k in range(24)]) - _logit(frac.mean())
+    n = len(g) / 24.0
+    return raw * n / (n + k_shrink)
+
+
+def ewshare_logit(hist, origins, half_life_days, profile, covered=None, since=None):
+    """B6 (D46): sigmoid(logit(B4 level) + profile[Kyiv hour of the label time]). (origins, 24)."""
+    base = ewshare(hist, origins, half_life_days, covered, since)[:, 0]
+    lt = np.asarray(origins, dtype=np.int64)[:, None] + np.asarray(config.HORIZONS, dtype=np.int64)[None, :] * H
+    z = _logit(base)[:, None] + np.asarray(profile)[hour_of_day(lt.ravel()).reshape(lt.shape)]
+    return 1.0 / (1.0 + np.exp(-z))
+
+
 DUR_GRID = np.arange(5.0, 24 * 60 + 5, 5.0)                       # minutes; last point = 24 h
 
 
