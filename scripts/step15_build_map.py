@@ -228,7 +228,7 @@ input[type=range]{width:100%}
       This is a research model. A low chance of an alert does not mean it is safe: an alert can start at any moment, and beyond the first few hours the model is only slightly better than a plain average. Always follow the official air-raid alerts.</div>
     <div class="box" style="display:grid;gap:10px">
       <div class="k">A one-hour trip within the city (assumed: no travel while an announced alert is active there)</div>
-      <div class="pick"><select id="tplace" aria-label="Destination"><option>McDonald's</option><option>a shopping mall</option></select>
+      <div class="pick"><select id="tplace" aria-label="Destination"><option value="dnipro">cross the Dnipro in Kyiv (Left Bank - Right Bank)</option><option>McDonald's</option><option>a shopping mall</option></select>
         <select id="tcity" aria-label="City or raion"></select>
         <select id="thour" aria-label="Hour of the trip"></select></div>
       <div class="v" id="tline"></div>
@@ -236,6 +236,7 @@ input[type=range]{width:100%}
         <div><div class="k">Chance you can go</div><div class="big" id="tp-go"></div></div></div>
       <div class="verdict" id="tverdict"></div>
       <p class="note" id="tnow" hidden></p>
+      <p class="note" id="tdn" hidden>Assumed: no crossing while an announced alert is active in Kyiv. Possible closures of bridges or the metro are not in our data and were not checked.</p>
       <div><div class="k" style="margin-bottom:6px">Chance of an alert, hour by hour (tap a bar to choose the hour)</div>
         <div class="tbars" id="tbars"></div><div class="tbt"><span>+1 h</span><span>+12 h</span><span>+24 h</span></div></div>
       <p class="note">Says nothing about whether the place is open. Kyiv is one unit in our data, so the Left and Right Banks get the same number. Other cities are shown as the raion they belong to. The number is the model's chance of an alert at the start of the chosen hour.</p>
@@ -355,12 +356,18 @@ let tk = 0;
     groups[ob].sort((a, b) => a[1].name.localeCompare(b[1].name, "uk")).forEach(([pc, i]) => g.appendChild(new Option(i.name + " - " + i.en, pc)));
     tcity.appendChild(g); }
   tcity.value = Object.keys(DATA.info).find(pc => DATA.info[pc].obl === "Kyiv City");
+  var KYIV = tcity.value;
   m.target_times_utc.forEach((t, k) => thour.add(new Option(kyiv(t) + "  (" + HZ[k] + ")", k)));
 }
 function drawTrip() {
+  const dn = tplace.value === "dnipro";
+  if (dn) tcity.value = KYIV;
+  tcity.disabled = dn;
+  document.getElementById("tdn").hidden = !dn;
   const i = DATA.info[tcity.value], p = i.p[tk], t = kyiv(m.target_times_utc[tk]);
   document.getElementById("sub").textContent = "Data up to " + kyiv(m.data_up_to_utc) + " Kyiv time. Chance that an announced alert is active during a one-hour trip.";
-  document.getElementById("tline").textContent = "Trip to " + tplace.value + " in " + i.name + ", " + t + " Kyiv time";
+  document.getElementById("tline").textContent = dn ? "Crossing the Dnipro in Kyiv (Left Bank - Right Bank), " + t + " Kyiv time"
+    : "Trip to " + tplace.value + " in " + i.name + ", " + t + " Kyiv time";
   document.getElementById("tp-alert").textContent = pct(p);
   document.getElementById("tp-go").textContent = pct(1 - p);
   const v = document.getElementById("tverdict");
