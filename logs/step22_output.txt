@@ -1,0 +1,6 @@
+live snapshot 20261012T163223Z: 24/24 units OK
+[load_histories official] dropped 0 episodes starting after the snapshot cutoff, 1 zero-length episodes
+data up to 12 Oct 19:32 Kyiv; first target 12 Oct 20:00, last 13 Oct 19:00 Kyiv
+raions modeled 110, under alert at cutoff 18
+median probability by horizon: +1:0.17 +3:0.20 +6:0.15 +12:0.18 +18:0.15 +24:0.14
+saved -> forecasts/final_20261012T163223Z.csv/.json -> COMMIT NOW, before 20:00 Kyiv
