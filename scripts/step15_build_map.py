@@ -84,6 +84,9 @@ def main():
     past = {"pcs": [pc_of[u] for u in pj["units"]], "base_utc": pj["base_utc"], "origins": pj["origins"], "p": pj["p"],
             "actual": {pc_of[u]: v for u, v in pj["actual"].items()}, "n_hours": pj["n_hours"]}
     adm2_obl = {f["properties"]["adm2_pcode"]: f["properties"]["adm1_pcode"] for f in adm2}
+    mcd = pd.read_csv(config.ROOT / "config" / "mcdonalds_cities.csv")           # step24: cities with an open McDonald's
+    mcd_info = {"cities": [{"city": r["city"], "n": int(r["n_open"]), "pc": r["pcode"], "unit": r["unit"].replace(" / ", ", ")} for _, r in mcd.iterrows()],
+                "fetched": (config.ROOT / "config" / "mcdonalds_cities_fetched.txt").read_text().strip()}
 
     info = {r["hdx_pcode"]: {"name": r["raion_uk"] if isinstance(r["raion_uk"], str) else "Київ", "p": [round(float(r[f"p_{h}h"]), 3) if pd.notna(r[f"p_{h}h"]) else None for h in range(1, 25)],
                              "now": int(r["alert_now"]) if pd.notna(r["alert_now"]) else 0, "en": r["unit"].replace(" / ", ", "),
@@ -119,7 +122,7 @@ def main():
     borders = "".join(f'<path class="obh" d="{d}"/>' for d in bd) + "".join(f'<path class="ob" d="{d}"/>' for d in bd)
     mix = {m["unit_name"]: m for m in meta.get("observed_last_7_days_by_oblast", [])}
     page = TEMPLATE.replace("__H__", f"{height:.0f}").replace("__SHAPES__", "".join(shapes)).replace("__BORDERS__", borders).replace("__LABELS__", labels)
-    page = page.replace("__DATA__", json.dumps({"info": info, "obl": obl, "past": past, "meta": meta, "mix": mix}, ensure_ascii=False))
+    page = page.replace("__DATA__", json.dumps({"info": info, "obl": obl, "past": past, "mcd": mcd_info, "meta": meta, "mix": mix}, ensure_ascii=False))
     OUT.parent.mkdir(exist_ok=True)
     OUT.write_text(page, encoding="utf-8")
     # GitHub Pages copy: a full document, system fonts only (no external requests)
@@ -239,7 +242,8 @@ input[type=range]{width:100%}
       <p class="note" id="tdn" hidden>Assumed: no crossing while an announced alert is active in Kyiv. Possible closures of bridges or the metro are not in our data and were not checked.</p>
       <div><div class="k" style="margin-bottom:6px">Chance of an alert, hour by hour (tap a bar to choose the hour)</div>
         <div class="tbars" id="tbars"></div><div class="tbt"><span>+1 h</span><span>+12 h</span><span>+24 h</span></div></div>
-      <p class="note">Says nothing about whether the place is open. Kyiv is one unit in our data, so the Left and Right Banks get the same number. Other cities are shown as the raion they belong to. The number is the model's chance of an alert at the start of the chosen hour.</p>
+      <p class="note" id="tmcd"></p>
+      <p class="note">Kyiv is one unit in our data, so the Left and Right Banks get the same number. A city is shown as the raion it belongs to (several towns can share one raion). The number is the model's chance of an alert at the start of the chosen hour.</p>
     </div>
   </div>
   <div class="grid" id="grid">
@@ -350,24 +354,22 @@ for (let b = 0; b < 3; b++) document.getElementById("pm-" + b).addEventListener(
 // "Can I go?" tab: one-hour trip, chance of an alert at the chosen hour for the chosen raion (D48)
 const tcity = document.getElementById("tcity"), thour = document.getElementById("thour"), tplace = document.getElementById("tplace");
 let tk = 0;
-{ const groups = {};
-  for (const [pc, i] of Object.entries(DATA.info)) if (!i.ex) (groups[i.obl] = groups[i.obl] || []).push([pc, i]);
-  for (const ob of Object.keys(groups).sort()) { const g = document.createElement("optgroup"); g.label = ob;
-    groups[ob].sort((a, b) => a[1].name.localeCompare(b[1].name, "uk")).forEach(([pc, i]) => g.appendChild(new Option(i.name + " - " + i.en, pc)));
-    tcity.appendChild(g); }
-  tcity.value = Object.keys(DATA.info).find(pc => DATA.info[pc].obl === "Kyiv City");
+const CITIES = DATA.mcd.cities.slice().sort((x, y) => x.city.localeCompare(y.city, "uk"));   // option value = index (towns can share a raion)
+{ CITIES.forEach((c, k) => tcity.add(new Option(c.city + " - " + c.unit + " (" + c.n + (c.n === 1 ? " restaurant)" : " restaurants)"), k)));
+  tcity.value = CITIES.findIndex(c => DATA.info[c.pc].obl === "Kyiv City");
   var KYIV = tcity.value;
   m.target_times_utc.forEach((t, k) => thour.add(new Option(kyiv(t) + "  (" + HZ[k] + ")", k)));
 }
 function drawTrip() {
   const dn = tplace.value === "dnipro";
+  document.getElementById("tmcd").textContent = "Only cities with an open McDonald's are listed (" + DATA.mcd.cities.length + " cities; the McDonald's restaurant locator, " + DATA.mcd.fetched.slice(0, 16).replace("T", " ") + " UTC). A restaurant can still be closed today - this tab does not know that.";
   if (dn) tcity.value = KYIV;
   tcity.disabled = dn;
   document.getElementById("tdn").hidden = !dn;
-  const i = DATA.info[tcity.value], p = i.p[tk], t = kyiv(m.target_times_utc[tk]);
+  const c = CITIES[+tcity.value], i = DATA.info[c.pc], p = i.p[tk], t = kyiv(m.target_times_utc[tk]);
   document.getElementById("sub").textContent = "Data up to " + kyiv(m.data_up_to_utc) + " Kyiv time. Chance that an announced alert is active during a one-hour trip.";
   document.getElementById("tline").textContent = dn ? "Crossing the Dnipro in Kyiv (Left Bank - Right Bank), " + t + " Kyiv time"
-    : "Trip to " + tplace.value + " in " + i.name + ", " + t + " Kyiv time";
+    : "Trip to " + tplace.value + " in " + c.city + ", " + t + " Kyiv time";
   document.getElementById("tp-alert").textContent = pct(p);
   document.getElementById("tp-go").textContent = pct(1 - p);
   const v = document.getElementById("tverdict");
