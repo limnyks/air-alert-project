@@ -86,7 +86,7 @@ def main():
     adm2_obl = {f["properties"]["adm2_pcode"]: f["properties"]["adm1_pcode"] for f in adm2}
 
     info = {r["hdx_pcode"]: {"name": r["raion_uk"] if isinstance(r["raion_uk"], str) else "Київ", "p": [round(float(r[f"p_{h}h"]), 3) if pd.notna(r[f"p_{h}h"]) else None for h in range(1, 25)],
-                             "now": int(r["alert_now"]) if pd.notna(r["alert_now"]) else 0,
+                             "now": int(r["alert_now"]) if pd.notna(r["alert_now"]) else 0, "en": r["unit"].replace(" / ", ", "),
                              "ex": bool(r["excluded"]), "obl": r["unit"].split(" / ")[0], "op": adm2_obl[r["hdx_pcode"]]}
             for _, r in fc.iterrows()}
     obl = {}
@@ -164,6 +164,17 @@ svg{width:100%;height:auto;display:block}
 .prow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 select{font:500 14px var(--body);padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
 .tabs button:disabled{opacity:.35;cursor:default}
+.trip{display:grid;gap:12px;max-width:760px}
+.disc{border:2px solid var(--p2);border-radius:10px;padding:14px 16px;background:var(--panel);font-size:16px;line-height:1.45}
+.disc b{display:block;font:600 18px var(--display);margin-bottom:4px}
+.pick{display:flex;gap:10px;flex-wrap:wrap}.pick select{flex:1 1 220px;min-width:0}
+.bigs{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.big{font:600 clamp(34px,7vw,52px)/1 var(--display);font-variant-numeric:tabular-nums}
+.verdict{border-left:4px solid var(--line);padding-left:12px;font-size:16px}
+.tbars{display:flex;align-items:flex-end;gap:3px;height:76px}
+.tbars button{flex:1 1 0;min-width:0;border:0;border-radius:3px 3px 0 0;cursor:pointer;padding:0}
+.tbars button[aria-pressed="true"]{outline:2px solid var(--ink);outline-offset:1px}
+.tbt{display:flex;justify-content:space-between;font:12px var(--mono);color:var(--muted)}
 .ob,.obh{fill:none;stroke-linejoin:round;pointer-events:none}
 .obh{stroke:var(--halo);stroke-width:4.2}
 .ob{stroke:var(--border);stroke-width:1.9}
@@ -195,6 +206,7 @@ input[type=range]{width:100%}
   <div class="tabs" role="group" aria-label="View">
     <button id="tab-live" aria-pressed="true">Forecast</button>
     <button id="tab-past" aria-pressed="false">Past days: forecast vs real</button>
+    <button id="tab-trip" aria-pressed="false">Can I go?</button>
   </div>
   <div class="box future" id="past-box" hidden>
     <label class="k" for="pday">Forecast made on (Kyiv time)</label>
@@ -210,6 +222,24 @@ input[type=range]{width:100%}
   <div class="tabs" role="group" aria-label="Level" id="lvl-box">
     <button id="lvl-raion" aria-pressed="true">Raions</button>
     <button id="lvl-oblast" aria-pressed="false">Oblasts</button>
+  </div>
+  <div class="trip" id="trip" hidden>
+    <div class="disc" role="alert"><b>Probabilities only - not a basis for any decision about your safety or life.</b>
+      This is a research model. A low chance of an alert does not mean it is safe: an alert can start at any moment, and beyond the first few hours the model is only slightly better than a plain average. Always follow the official air-raid alerts.</div>
+    <div class="box" style="display:grid;gap:10px">
+      <div class="k">A one-hour trip within the city (assumed: no travel while an announced alert is active there)</div>
+      <div class="pick"><select id="tplace" aria-label="Destination"><option>McDonald's</option><option>a shopping mall</option></select>
+        <select id="tcity" aria-label="City or raion"></select>
+        <select id="thour" aria-label="Hour of the trip"></select></div>
+      <div class="v" id="tline"></div>
+      <div class="bigs"><div><div class="k">Chance of an alert</div><div class="big" id="tp-alert"></div></div>
+        <div><div class="k">Chance you can go</div><div class="big" id="tp-go"></div></div></div>
+      <div class="verdict" id="tverdict"></div>
+      <p class="note" id="tnow" hidden></p>
+      <div><div class="k" style="margin-bottom:6px">Chance of an alert, hour by hour (tap a bar to choose the hour)</div>
+        <div class="tbars" id="tbars"></div><div class="tbt"><span>+1 h</span><span>+12 h</span><span>+24 h</span></div></div>
+      <p class="note">Says nothing about whether the place is open. Kyiv is one unit in our data, so the Left and Right Banks get the same number. Other cities are shown as the raion they belong to. The number is the model's chance of an alert at the start of the chosen hour.</p>
+    </div>
   </div>
   <div class="grid" id="grid">
     <div class="map" id="map1"><div class="k mt" id="mt1" hidden>Our forecast</div><svg viewBox="0 0 1000 __H__" role="img" aria-label="Map of Ukrainian raions coloured by alert probability">
@@ -272,7 +302,11 @@ function pastVals(pc) {
   return {p: PD.p[o.k][ui][hz] / 100, a: ch === "1" ? 1 : ch === "0" ? 0 : null};
 }
 function draw() {
-  const past = mode === "past", lv = past ? "raion" : level;
+  const past = mode === "past", trip = mode === "trip", lv = past ? "raion" : level;
+  document.getElementById("trip").hidden = !trip;
+  document.getElementById("grid").hidden = trip;
+  document.getElementById("hz-tabs").hidden = trip;
+  if (trip) { document.getElementById("past-box").hidden = true; document.getElementById("lvl-box").hidden = true; drawTrip(); return; }
   svg.classList.toggle("lvl-oblast", lv === "oblast");
   document.getElementById("grid").classList.toggle("pair", past);
   for (const id of ["map2", "mt1", "past-box", "past-stats", "past-legend"]) document.getElementById(id).hidden = !past;
@@ -306,12 +340,45 @@ for (const [id, lv] of [["lvl-raion", "raion"], ["lvl-oblast", "oblast"]]) {
   document.getElementById(id).addEventListener("click", () => { level = lv;
     for (const b of document.querySelectorAll('[aria-label="Level"] button')) b.setAttribute("aria-pressed", String(b.id === id)); draw(); });
 }
-for (const [id, md] of [["tab-live", "live"], ["tab-past", "past"]]) {
+for (const [id, md] of [["tab-live", "live"], ["tab-past", "past"], ["tab-trip", "trip"]]) {
   document.getElementById(id).addEventListener("click", () => { mode = md; for (const b of document.querySelectorAll('[aria-label="View"] button')) b.setAttribute("aria-pressed", String(b.id === id)); draw(); });
 }
 document.getElementById("hz").addEventListener("input", e => { hz = +e.target.value; e.target.setAttribute("aria-valuetext", HZTXT[hz]); draw(); });
 pday.addEventListener("change", () => { pdi = +pday.value; if (!originFor(pdi, pmi)) pmi = [0, 1, 2].find(b => originFor(pdi, b)); draw(); });
 for (let b = 0; b < 3; b++) document.getElementById("pm-" + b).addEventListener("click", () => { pmi = b; draw(); });
+// "Can I go?" tab: one-hour trip, chance of an alert at the chosen hour for the chosen raion (D48)
+const tcity = document.getElementById("tcity"), thour = document.getElementById("thour"), tplace = document.getElementById("tplace");
+let tk = 0;
+{ const groups = {};
+  for (const [pc, i] of Object.entries(DATA.info)) if (!i.ex) (groups[i.obl] = groups[i.obl] || []).push([pc, i]);
+  for (const ob of Object.keys(groups).sort()) { const g = document.createElement("optgroup"); g.label = ob;
+    groups[ob].sort((a, b) => a[1].name.localeCompare(b[1].name, "uk")).forEach(([pc, i]) => g.appendChild(new Option(i.name + " - " + i.en, pc)));
+    tcity.appendChild(g); }
+  tcity.value = Object.keys(DATA.info).find(pc => DATA.info[pc].obl === "Kyiv City");
+  m.target_times_utc.forEach((t, k) => thour.add(new Option(kyiv(t) + "  (" + HZ[k] + ")", k)));
+}
+function drawTrip() {
+  const i = DATA.info[tcity.value], p = i.p[tk], t = kyiv(m.target_times_utc[tk]);
+  document.getElementById("sub").textContent = "Data up to " + kyiv(m.data_up_to_utc) + " Kyiv time. Chance that an announced alert is active during a one-hour trip.";
+  document.getElementById("tline").textContent = "Trip to " + tplace.value + " in " + i.name + ", " + t + " Kyiv time";
+  document.getElementById("tp-alert").textContent = pct(p);
+  document.getElementById("tp-go").textContent = pct(1 - p);
+  const v = document.getElementById("tverdict");
+  v.textContent = p < 0.2 ? "Alert unlikely at this hour - the trip is probably possible. Not a guarantee."
+    : p < 0.5 ? "Alert possible - the trip is uncertain." : "Alert likely - the trip is probably not possible.";
+  v.style.borderLeftColor = col(p);
+  const now = document.getElementById("tnow");
+  now.hidden = !(i.now && tk < 3);
+  now.textContent = "An alert was active here at the data time (" + kyiv(m.data_up_to_utc) + "); the first hours are affected most.";
+  const bars = document.getElementById("tbars"); bars.textContent = "";
+  i.p.forEach((q, k) => { const b = document.createElement("button");
+    b.style.height = Math.max(3, Math.round(q * 76)) + "px"; b.style.background = col(q);
+    b.setAttribute("aria-pressed", String(k === tk)); b.setAttribute("aria-label", kyiv(m.target_times_utc[k]) + ": " + pct(q) + " chance of an alert");
+    b.title = kyiv(m.target_times_utc[k]) + ": " + pct(q); b.addEventListener("click", () => { tk = k; thour.value = k; drawTrip(); });
+    bars.appendChild(b); });
+}
+tcity.addEventListener("change", drawTrip); tplace.addEventListener("change", drawTrip);
+thour.addEventListener("change", () => { tk = +thour.value; drawTrip(); });
 const tip = document.getElementById("tip");
 function hover(e) {
   const el = e.target.closest(".r"); if (!el) { tip.hidden = true; return; }
