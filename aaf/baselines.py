@@ -5,6 +5,7 @@ statistics from data before the fold cut. Verified by aaf.leakage in step12c.
 """
 import numpy as np
 import pandas as pd
+from scipy.signal import lfilter
 
 from . import config
 from .history import UNKNOWN_END
@@ -68,6 +69,30 @@ def predict(name, params, hist, origins):
         share7 = (ontime_upto(hist, o) - ontime_upto(hist, o - 7 * DAY)) / (7 * DAY)
         return np.repeat(share7[:, None], len(config.HORIZONS), axis=1)
     raise ValueError(name)
+
+
+def ewshare(hist, origins, half_life_days, covered=None, since=None):
+    """B4 (D43): exponentially weighted share of time under alert before each origin, (origins, 24), flat.
+    p(t) = sum(w * on) / sum(w * covered) over past hours, w = 0.5 ** (age / half-life); hours without data
+    (covered False) are left out of both sums. Origins must lie on one hourly grid (e.g. all full hours).
+    since: earliest time with data (ns); default = first alert start."""
+    o = np.asarray(origins, dtype=np.int64)
+    end = int(o.max())
+    if (end - o).min() < 0 or ((end - o) % H).any():
+        raise ValueError("origins must lie on one hourly grid")
+    first = since if since is not None else (int(hist.starts[0]) if len(hist.starts) else end - H)
+    n = max(int(np.ceil((end - first) / H)), 1)
+    g = end - H * np.arange(n, 0, -1, dtype=np.int64)              # hourly bins [g, g + H); the last ends at `end`
+    frac = (ontime_upto(hist, g + H) - ontime_upto(hist, g)) / H
+    cov = (covered(g) & covered(g + H - 1)) if covered else np.ones(n, bool)
+    d = 0.5 ** (1.0 / (24.0 * half_life_days))
+    num = lfilter([1.0], [1.0, -d], np.where(cov, frac, 0.0))
+    den = lfilter([1.0], [1.0, -d], cov.astype(float))
+    k = n - 1 - (end - o) // H                                      # bin that ends exactly at each origin
+    p = np.full(len(o), np.nan)
+    ok = (k >= 0) & (den[np.clip(k, 0, None)] > 0)
+    p[ok] = num[k[ok]] / den[k[ok]]
+    return np.repeat(p[:, None], len(config.HORIZONS), axis=1)
 
 
 DUR_GRID = np.arange(5.0, 24 * 60 + 5, 5.0)                       # minutes; last point = 24 h
