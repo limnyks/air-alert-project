@@ -138,130 +138,130 @@ def main():
 
 
 TEMPLATE = r"""<title>Raion Alert Outlook</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400..700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Koulen&family=Instrument+Serif:ital@0;1&display=swap">
 <style>
-/* Design language: flat bordered cells, charcoal / white / grey, one orange accent (UI only, never on the map), scroll-driven section tones, tight grotesque + mono data type.
-   The alert colour scale (white -> red -> burgundy) keeps its meaning and is not part of the UI chrome. */
-:root{--bg:#ffffff;--panel:#ffffff;--surface:#e0e0e0;--ink:#232323;--muted:#666666;--line:#232323;--rs:#bcbcbc;--nodata:#cfcfcf;
---accent:#ff8a3d;--tone-grey:#e0e0e0;--char:#232323;--onchar:#f4f4f4;
---p0:#ffffff;--p1:#f8d3c8;--p2:#e3221b;--p3:#e5523a;--p4:#6b0f1a;--hit:#111827;--border:#11151c;--halo:#ffffff;
---body:"Inter Tight","Helvetica Neue",Helvetica,Arial,system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1a1a1a;--panel:#232323;--surface:#151515;--ink:#f4f4f4;--muted:#a3a3a3;--line:rgba(244,244,244,.5);--rs:#3b3b3b;--nodata:#2f2f2f;--tone-grey:#101010;
---p1:#4f2a27;--p3:#b8261b;--border:#0b0d12;--halo:#c9ced8;--hit:#f5f6f8;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#1a1a1a;--panel:#232323;--surface:#151515;--ink:#f4f4f4;--muted:#a3a3a3;--line:rgba(244,244,244,.5);--rs:#3b3b3b;--nodata:#2f2f2f;--tone-grey:#101010;
---p1:#4f2a27;--p3:#b8261b;--border:#0b0d12;--halo:#c9ced8;--hit:#f5f6f8;color-scheme:dark}
+/* Editorial report style: warm "mist" page, white paper cards, hairline rules, condensed display type,
+   serif reading text, pill-outline controls, calm reveal motion. Probability scale: one sequential
+   magma-like scale (white -> red -> burgundy, as in the earlier versions), lightness strictly decreasing,
+   no red/green pair; the map card stays light in both themes so the scale reads the same. */
+:root{--bg:#dbdcd7;--card:#ffffff;--paper:#ffffff;--ink:#010101;--muted:#5d5d58;--line:#010101;--soft:#c7c7c1;
+--rs:#c9c8c0;--nodata:#d9d9d3;--hatch:#9b9b94;--border:#010101;--halo:#ffffff;
+--c0:#ffffff;--c1:#f4a08f;--c2:#e3221b;--c3:#a5161b;--c4:#6b0f1a;
+--display:"Koulen","Bebas Neue",Impact,"Haettenschweiler","Avenir Next Condensed","Arial Narrow",sans-serif-condensed,sans-serif;
+--serif:"Instrument Serif","Iowan Old Style",Charter,Georgia,serif;
+--sans:"Helvetica Neue",Helvetica,Arial,"Segoe UI",system-ui,sans-serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101010;--card:#1b1b1b;--paper:#f4f3ee;--ink:#ecebe6;--muted:#a7a7a0;--line:#ecebe6;--soft:#3a3a37;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#101010;--card:#1b1b1b;--paper:#f4f3ee;--ink:#ecebe6;--muted:#a7a7a0;--line:#ecebe6;--soft:#3a3a37;color-scheme:dark}
 [hidden]{display:none!important}
-body{background:var(--bg);color:var(--ink);font:450 15px/1.45 var(--body);letter-spacing:-.015em}
-.wrap{max-width:1240px;margin:0 auto;padding-inline:16px;padding-block:16px 32px;display:grid;gap:16px}
-.top{border:1px solid var(--line);display:grid}
-.bar{display:flex;border-bottom:1px solid var(--line)}
-.cell{display:flex;align-items:center;padding:0 18px;min-height:56px;border-right:1px solid var(--line);font:400 12px var(--mono);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
-.cell:last-child{border-right:0}.cell.grow{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis}
-.logo{width:56px;padding:0;justify-content:center;background:var(--char)}
-.acc{background:var(--accent);color:#232323;cursor:pointer;font:450 15px var(--body);text-transform:none;letter-spacing:-.01em;gap:28px;justify-content:space-between;min-width:170px}
-.hero{background:var(--char);color:var(--onchar);padding:clamp(20px,3.4vw,40px) clamp(16px,3vw,32px) 24px;border-bottom:1px solid var(--line)}
-h1{font:450 clamp(38px,8.6vw,116px)/.9 var(--body);letter-spacing:-.05em;text-transform:uppercase;margin:0;text-wrap:balance}
-.sub{color:#bdbdbd;margin:16px 0 0;font:400 13px/1.55 var(--mono);letter-spacing:.01em;max-width:80ch}
-.grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:16px}
-@media (max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}}
+body{background:var(--bg);color:var(--ink);font:400 15px/1.5 var(--sans);letter-spacing:-.01em}
+.wrap{max-width:1320px;margin:0 auto;padding-inline:clamp(16px,2.4vw,32px);padding-block:0 40px;display:grid;gap:20px}
+/* top bar: pill-outline view switch + small two-line note, section dots on the right */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:18px 0 14px;background:var(--bg)}
+.lefts{display:flex;align-items:center;gap:16px;flex-wrap:wrap;min-width:0}
+.pills{display:flex;gap:6px;flex-wrap:wrap}
+.pills button,.tabs button,select{font:600 14px/1 var(--sans);letter-spacing:-.01em;padding:10px 16px;border:2px solid var(--ink);border-radius:999px;
+  background:transparent;color:var(--ink);cursor:pointer;transition:color .15s cubic-bezier(.4,0,.2,1),background-color .15s cubic-bezier(.4,0,.2,1)}
+.pills button:hover,.tabs button:hover{background:var(--ink);color:var(--bg)}
+.pills button[aria-pressed="true"],.tabs button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tabs button:disabled{opacity:.3;cursor:default;background:transparent;color:var(--ink)}
+.hint{font:600 12px/1.35 var(--sans);margin:0;color:var(--ink)}
+.hint span{display:block;font-variant-numeric:tabular-nums}
+.dots{display:flex;align-items:center;gap:7px;font:600 13px var(--sans);white-space:nowrap}
+.dots span{margin-right:6px}
+.dot{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--ink);background:transparent;padding:0;cursor:pointer}
+.dot[aria-current="true"]{background:var(--ink)}
+/* hero: condensed display headline, then a rule and the serif lede */
+.hero{padding-top:clamp(8px,2vw,24px)}
+h1{font:400 clamp(60px,10.6vw,176px)/.88 var(--display);font-synthesis:none;text-transform:uppercase;margin:0;letter-spacing:-.005em;text-wrap:balance;will-change:transform}
+.lede{display:grid;grid-template-columns:minmax(0,220px) minmax(0,1fr);gap:24px;border-top:2px solid var(--line);margin-top:clamp(18px,2.6vw,32px);padding-top:18px}
+.tag{display:inline-flex;align-items:center;gap:8px;font:400 22px/1 var(--display);text-transform:uppercase;align-self:start}
+.tag i{font:600 12px/1 var(--sans);font-style:normal;border:1.5px solid var(--ink);border-radius:999px;padding:4px 9px}
+.sub{font:400 clamp(19px,1.9vw,24px)/1.35 var(--serif);margin:0;max-width:62ch;letter-spacing:-.01em}
+/* rows */
+.box{background:var(--card);border-radius:3px;padding:16px 18px}
+.future{display:grid;grid-template-columns:minmax(0,260px) minmax(0,1fr);gap:8px 24px;align-items:center;background:transparent;border-top:2px solid var(--line);border-radius:0;padding:18px 0 4px}
+.future > .k{grid-row:span 3;font:600 clamp(20px,2vw,28px)/1.15 var(--sans);letter-spacing:-.025em;text-transform:none;color:var(--ink);align-self:start}
+.future > *:not(.k){grid-column:2}
+.k{font:600 12px/1.3 var(--sans);letter-spacing:.01em;text-transform:uppercase;color:var(--muted)}
+.v{font:400 14px/1.55 var(--sans);font-variant-numeric:tabular-nums}
+.note{color:var(--muted);font:400 16px/1.4 var(--serif);margin:0}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px}
+@media (max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}}
 .grid.pair{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 .grid.pair .side{grid-column:1/-1;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
-@media (max-width:860px){.grid.pair{grid-template-columns:minmax(0,1fr)}}
-.map{background:var(--surface);border:1px solid var(--line);padding:8px;min-width:0}
+@media (max-width:900px){.grid.pair{grid-template-columns:minmax(0,1fr)}}
+.map{background:var(--paper);border-radius:3px;padding:10px;min-width:0;color:#010101}
 .map svg{width:100%;height:auto;display:block}
-.mt{padding:4px 6px 8px}
+.mt{padding:4px 6px 8px;color:#5d5d58}
 .r{stroke:var(--rs);stroke-width:.35;cursor:pointer}
+.r.m{transition:fill .45s cubic-bezier(.4,0,.2,1)}
 .lvl-oblast .r{stroke-width:0}
 .r.nd{fill:url(#hatch-nd)}.r.ex{fill:url(#hatch-ex)}
-.r:hover,.r:focus{stroke:var(--ink);stroke-width:1.4}
+.r:hover,.r:focus{stroke:#010101;stroke-width:1.4}
 .ob,.obh{fill:none;stroke-linejoin:round;pointer-events:none}
-.obh{stroke:var(--halo);stroke-width:4.2}
-.ob{stroke:var(--border);stroke-width:1.9}
-.ol{font:600 11px var(--body);fill:var(--ink);paint-order:stroke;stroke:var(--panel);stroke-width:3px;text-anchor:middle;pointer-events:none;display:none}
-.lvl-oblast .ol{display:block}
+.obh{stroke:var(--halo);stroke-width:4}
+.ob{stroke:var(--border);stroke-width:1.6}
+.ol{display:none}
 .side{display:grid;gap:12px;align-content:start;min-width:0}
-.box{background:var(--panel);border:1px solid var(--line);padding:14px 16px}
-.k{font:400 11px/1.3 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-.v{font:400 13px/1.5 var(--mono);font-variant-numeric:tabular-nums}
-.tabs{display:flex;flex-wrap:wrap;padding-right:1px}
-.tabs button{flex:1 1 auto;font:450 15px var(--body);letter-spacing:-.01em;padding:13px 18px;border:1px solid var(--line);margin:0 -1px -1px 0;border-radius:0;background:var(--panel);color:var(--ink);cursor:pointer}
-.tabs button:hover{background:var(--surface)}
-.tabs button[aria-pressed="true"]{background:var(--accent);color:#232323}
-.tabs button:disabled{opacity:.35;cursor:default}
-.top .tabs{padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}.top .tabs button{margin:0;border-width:0 1px 0 0;font-size:16px;padding:16px 20px;text-align:left}.top .tabs button:last-child{border-right:0}
-.legend{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;margin-top:6px}
-.legend span{height:12px}.ticks{display:flex;justify-content:space-between;font:400 12px var(--mono);color:var(--muted);margin-top:4px}
-.sw{display:inline-block;width:14px;height:12px;vertical-align:-2px;margin-right:6px;border:1px solid var(--line)}
-#tip{position:fixed;pointer-events:none;background:var(--char);color:var(--onchar);padding:8px 11px;font:450 13px/1.4 var(--body);max-width:260px;border:1px solid var(--accent)}
-.future{display:grid;gap:8px}
+.legend{display:block;height:14px;margin-top:8px;border-radius:2px}
+.ticks{display:flex;justify-content:space-between;font:600 12px var(--sans);color:var(--muted);margin-top:5px;font-variant-numeric:tabular-nums}
 .hzt{color:var(--ink)}
-input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:30px;background:transparent;margin:0;cursor:pointer}
+.sw{display:inline-block;width:14px;height:12px;vertical-align:-1px;margin-right:6px;border:1px solid var(--soft);border-radius:2px}
+#tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--bg);padding:9px 13px;font:600 13px/1.4 var(--sans);max-width:270px;border-radius:12px}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:32px;background:transparent;margin:0;cursor:pointer}
 input[type=range]::-webkit-slider-runnable-track{height:2px;background:var(--ink)}
 input[type=range]::-moz-range-track{height:2px;background:var(--ink)}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;margin-top:-11px;background:var(--accent);border:1px solid #232323;border-radius:0}
-input[type=range]::-moz-range-thumb{width:22px;height:22px;background:var(--accent);border:1px solid #232323;border-radius:0}
-.note{color:var(--muted);font-size:13px;line-height:1.45;margin:0}
-.warn{background:var(--char);border-color:var(--char)}.warn .note{color:#d9d9d9}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;margin-top:-11px;background:var(--bg);border:2px solid var(--ink);border-radius:50%;transition:background-color .15s}
+input[type=range]::-moz-range-thumb{width:20px;height:20px;background:var(--bg);border:2px solid var(--ink);border-radius:50%}
+input[type=range]:hover::-webkit-slider-thumb{background:var(--ink)}
+.warn{background:transparent;border:2px solid var(--ink)}.warn .note{color:var(--ink)}
 .prow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-select{font:450 14px var(--body);padding:10px 12px;border-radius:0;border:1px solid var(--line);background:var(--panel);color:var(--ink)}
-.trip{display:grid;gap:12px;max-width:820px}
-.disc{border:2px solid var(--p2);padding:16px 18px;background:var(--panel);font-size:16px;line-height:1.45}
-.disc b{display:block;font:600 20px/1.2 var(--body);letter-spacing:-.025em;margin-bottom:6px}
-.pick{display:flex;gap:10px;flex-wrap:wrap}.pick select{flex:1 1 220px;min-width:0}
+select{padding-right:34px;appearance:auto;background:var(--card)}
+.trip{display:grid;gap:14px;max-width:880px}
+.disc{border:2px solid var(--ink);border-radius:3px;padding:18px 20px;background:var(--card);font:400 18px/1.4 var(--serif)}
+.disc b{display:block;font:600 20px/1.2 var(--sans);letter-spacing:-.025em;margin-bottom:6px}
+.pick{display:flex;gap:8px;flex-wrap:wrap}.pick select{flex:1 1 220px;min-width:0}
 .bigs{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.big{font:450 clamp(46px,9vw,88px)/.95 var(--body);letter-spacing:-.055em;font-variant-numeric:tabular-nums}
-.verdict{border-left:4px solid var(--line);padding-left:12px;font-size:16px}
+.big{font:400 clamp(64px,11vw,128px)/.85 var(--display);font-synthesis:none;font-variant-numeric:tabular-nums;margin-top:4px}
+.verdict{border-left:4px solid var(--soft);padding-left:12px;font:400 20px/1.35 var(--serif)}
 .tbars{display:flex;align-items:flex-end;gap:3px;height:76px}
-.tbars button{flex:1 1 0;min-width:0;border:0;border-radius:0;cursor:pointer;padding:0}
+.tbars button{flex:1 1 0;min-width:0;border:0;border-radius:2px 2px 0 0;cursor:pointer;padding:0}
 .tbars button[aria-pressed="true"]{outline:2px solid var(--ink);outline-offset:1px}
-.tbt{display:flex;justify-content:space-between;font:400 12px var(--mono);color:var(--muted)}
-:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
-@media (max-width:700px){#dataline{display:none}.cell{padding:0 12px}.acc{min-width:0;flex:1 1 auto}
-  .top .tabs{grid-template-columns:minmax(0,1fr)}.top .tabs button{padding:14px 16px;font-size:15px;border-width:0 0 1px 0}.top .tabs button:last-child{border-bottom:0}}
-/* scroll-driven tones: the page background follows the section in the middle of the screen */
-body{transition:background-color .7s cubic-bezier(.2,.7,.2,1)}
-body[data-tone="grey"]{background:var(--tone-grey)}
-body[data-tone="accent"]{background:var(--accent)}
-.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--panel);border:1px solid var(--line)}
-.top{border-top:0}
-.prog{position:absolute;left:0;right:0;bottom:-1px;height:3px;background:var(--accent);transform-origin:0 50%;transform:scaleX(0)}
-.acc{border:0;font:450 15px var(--body);transition:padding .3s}
-.acc:hover .arr{transform:translateX(6px)}.arr{transition:transform .3s;display:inline-block}
-.hero{overflow:hidden}
-h1{will-change:transform}
-.r.m{transition:fill .45s cubic-bezier(.2,.7,.2,1)}
-.tabs button{transition:background-color .25s}
-.reveal{opacity:0;transform:translateY(22px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+.tbt{display:flex;justify-content:space-between;font:600 12px var(--sans);color:var(--muted)}
+.foot{border-top:2px solid var(--line);padding-top:clamp(20px,3vw,36px);display:grid;gap:16px;overflow:hidden}
+.foot h2{font:400 clamp(56px,11.5vw,184px)/.88 var(--display);font-synthesis:none;text-transform:uppercase;margin:0}
+.foot p{font:400 20px/1.4 var(--serif);margin:0;max-width:60ch}
+.reveal{opacity:0;transform:translateY(18px);transition:opacity .6s cubic-bezier(.4,0,.2,1),transform .6s cubic-bezier(.4,0,.2,1)}
 .reveal.in{opacity:1;transform:none}
-.foot{border:1px solid var(--line);padding:clamp(28px,6vw,72px) clamp(16px,3vw,32px);color:#232323;display:grid;gap:18px;overflow:hidden}
-body[data-tone="accent"] .foot{border-color:#232323}
-.foot h2{font:450 clamp(40px,9.4vw,128px)/.88 var(--body);letter-spacing:-.055em;text-transform:uppercase;margin:0;color:var(--ink);transform:translateX(12%);opacity:0;transition:transform 1s cubic-bezier(.2,.7,.2,1),opacity 1s,color .7s}
-body[data-tone="accent"] .foot h2,body[data-tone="accent"] .foot p{color:#232323}
-.foot.in h2{transform:none;opacity:1}
-.foot p{font:400 13px/1.5 var(--mono);letter-spacing:.02em;margin:0;color:var(--muted);max-width:70ch;transition:color .7s}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}.reveal{opacity:1;transform:none}.foot h2{opacity:1;transform:none}h1{transform:none!important}}
+:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+@media (max-width:760px){.lede,.future{grid-template-columns:minmax(0,1fr)}.future > .k{grid-row:auto}.future > *:not(.k){grid-column:1}
+  .hint{display:none}.dots span{display:none}.bar{padding:12px 0 10px}.pills button{padding:9px 12px;font-size:13px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}.reveal{opacity:1;transform:none}h1{transform:none!important}}
 </style>
 <div class="wrap">
-  <div class="bar">
-      <div class="cell logo" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 40 40"><circle cx="20" cy="20" r="14" fill="none" stroke="#f4f4f4" stroke-width="2"/><circle cx="20" cy="20" r="8" fill="none" stroke="#f4f4f4" stroke-width="1" opacity=".5"/><circle cx="20" cy="20" r="4" fill="#ff8a3d"/></svg></div>
-      <div class="cell" id="clock" aria-label="Current Kyiv time">Kyiv --:--</div>
-      <div class="cell grow" id="dataline"></div>
-      <button class="cell acc" id="go-map" type="button"><span>Next 24 h</span><span class="arr" aria-hidden="true">&rarr;</span></button>
-    <div class="prog" id="prog" aria-hidden="true"></div>
-  </div>
-  <div class="top">
-    <div class="hero"><h1>Raion Alert Outlook</h1>
-      <p class="sub" id="sub"></p></div>
-    <div class="tabs" role="group" aria-label="View">
-      <button id="tab-live" aria-pressed="true">Forecast</button>
-      <button id="tab-past" aria-pressed="false">Past days: forecast vs real</button>
-      <button id="tab-trip" aria-pressed="false">Can I go?</button>
+  <header class="bar">
+    <div class="lefts">
+      <div class="pills" role="group" aria-label="View">
+        <button id="tab-live" aria-pressed="true">Forecast</button>
+        <button id="tab-past" aria-pressed="false">Past days</button>
+        <button id="tab-trip" aria-pressed="false">Can I go?</button>
+      </div>
+      <p class="hint"><span id="clock">Kyiv --:--:--</span><span id="dataline"></span></p>
     </div>
-  </div>
+    <nav class="dots" aria-label="Views"><span id="dotname">Forecast</span>
+      <button class="dot" data-for="tab-live" aria-label="Forecast" aria-current="true"></button><button class="dot" data-for="tab-past" aria-label="Past days: forecast vs real"></button><button class="dot" data-for="tab-trip" aria-label="Can I go?"></button></nav>
+  </header>
+  <section class="hero">
+    <h1>Raion Alert Outlook</h1>
+    <div class="lede"><div class="tag">24 h <i>110 raions</i></div><p class="sub" id="sub"></p></div>
+  </section>
   <div class="box future" id="past-box" hidden>
-    <label class="k" for="pday">Forecast made on (Kyiv time)</label>
+    <label class="k" for="pday">Forecast made on</label>
     <div class="prow"><select id="pday"></select>
       <div class="tabs" id="pmade" role="group" aria-label="Made at"><button id="pm-0">06:00</button><button id="pm-1">12:00</button><button id="pm-2">18:00</button></div></div>
+    <p class="note">Kyiv time.</p>
   </div>
   <div class="box future" id="hz-tabs">
     <label class="k" for="hz" id="hz-title">Forecast: chance of an alert in the next hours</label>
@@ -296,17 +296,17 @@ body[data-tone="accent"] .foot h2,body[data-tone="accent"] .foot p{color:#232323
   <div class="grid" id="grid">
     <div class="map" id="map1"><div class="k mt" id="mt1" hidden>Our forecast</div><svg viewBox="0 0 1000 __H__" role="img" aria-label="Map of Ukrainian raions coloured by alert probability">
       <defs>
-        <pattern id="hatch-nd" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="var(--nodata)"/><line x1="0" y1="0" x2="0" y2="6" stroke="var(--line)" stroke-width="2"/></pattern>
-        <pattern id="hatch-ex" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="var(--p3)"/><line x1="0" y1="0" x2="0" y2="6" stroke="var(--p4)" stroke-width="3"/></pattern>
+        <pattern id="hatch-nd" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="var(--nodata)"/><line x1="0" y1="0" x2="0" y2="6" stroke="var(--hatch)" stroke-width="2"/></pattern>
+        <pattern id="hatch-ex" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" fill="var(--c3)"/><line x1="0" y1="0" x2="0" y2="6" stroke="var(--c4)" stroke-width="3"/></pattern>
       </defs>
       <g id="raions">__SHAPES__</g><g>__BORDERS__</g></svg></div>
     <div class="map" id="map2" hidden><div class="k mt">What really happened</div></div>
     <div class="side">
-      <div class="box"><div class="k" id="legend-title">Chance of being under alert (redder = higher)</div>
-        <div class="legend" style="display:block;height:12px;background:linear-gradient(to right,var(--p0),var(--p2),var(--p4))"></div>
+      <div class="box"><div class="k" id="legend-title">Chance of being under alert (darker = higher)</div>
+        <div class="legend" style="background:linear-gradient(to right,var(--c0),var(--c1),var(--c2),var(--c3),var(--c4))"></div>
         <div class="ticks"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
-        <p class="note" style="margin-top:8px"><span class="sw" style="background:var(--p3)"></span>Hatched red: near-permanent alert (&gt;80% of time), not forecast<br><span class="sw" style="background:var(--nodata)"></span>Hatched grey: no data (Crimea, Sevastopol, Luhanska, Chornobyl zone)</p>
-        <p class="note" id="past-legend" style="margin-top:8px" hidden>Right map: <span class="sw" style="background:var(--p2)"></span>under alert &nbsp;<span class="sw" style="background:var(--p0)"></span>no alert &nbsp;<span class="sw" style="background:var(--nodata)"></span>not known yet</p></div>
+        <p class="note" style="margin-top:8px"><span class="sw" style="background:var(--c3)"></span>Hatched dark red: near-permanent alert (&gt;80% of time), not forecast<br><span class="sw" style="background:var(--nodata)"></span>Hatched grey: no data (Crimea, Sevastopol, Luhanska, Chornobyl zone)</p>
+        <p class="note" id="past-legend" style="margin-top:8px" hidden>Right map: <span class="sw" style="background:var(--c3)"></span>under alert &nbsp;<span class="sw" style="background:var(--c0)"></span>no alert &nbsp;<span class="sw" style="background:var(--nodata)"></span>not known yet</p></div>
       <div class="box" id="past-stats" hidden><div class="k">This hour</div><div class="v" id="pstats"></div>
         <p class="note" style="margin-top:8px">The model is refit before every forecast using only earlier data. Its settings were chosen on 2025 data, so these days are a later check, not an untouched test.</p></div>
       <div class="box"><div class="k">Data and model</div><div class="v" id="meta"></div></div>
@@ -314,17 +314,16 @@ body[data-tone="accent"] .foot h2,body[data-tone="accent"] .foot p{color:#232323
     </div>
   </div>
   <section class="foot" id="foot">
-    <h2>Not a warning system.<br>Follow official alerts.</h2>
-    <p>Research project. Probabilities of announced air-raid alerts, not of attacks - a low number never means safe.</p>
+    <h2>Follow official alerts.</h2>
+    <p>This is a research project, not a warning system. It shows probabilities of announced air-raid alerts, not of attacks, and a low number never means safe.</p>
   </section>
 </div>
 <div id="tip" hidden></div>
 <script>
 const DATA = __DATA__;
-// continuous, linear 0-100 %: white -> red -> burgundy (theme-aware via CSS colour mixing)
-const col = p => { p = Math.max(0, Math.min(1, p));
-  return p < 0.5 ? `color-mix(in oklab, var(--p2) ${(p * 200).toFixed(1)}%, var(--p0))`
-                 : `color-mix(in oklab, var(--p4) ${((p - 0.5) * 200).toFixed(1)}%, var(--p2))`; };
+const STOPS = ["--c0", "--c1", "--c2", "--c3", "--c4"].map(v => "var(" + v + ")");   // one sequential scale, 0 % -> 100 %
+const col = p => { p = Math.max(0, Math.min(1, p)); const x = p * 4, k = Math.min(3, Math.floor(x));
+  return `color-mix(in oklab, ${STOPS[k + 1]} ${((x - k) * 100).toFixed(1)}%, ${STOPS[k]})`; };
 const kyiv = s => new Date(s).toLocaleString("en-GB", {timeZone: "Europe/Kyiv", day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit"});
 const pct = p => (100 * p).toFixed(0) + "%";
 const HZ = Array.from({length: 24}, (_, k) => "+" + (k + 1) + "h");
@@ -385,7 +384,7 @@ function draw() {
     const v = pastVals(el.dataset.pc);
     if (!v) { el.style.fill = paths2[q].style.fill = "var(--nodata)"; return; }
     el.style.fill = col(v.p);
-    paths2[q].style.fill = v.a === null ? "var(--nodata)" : v.a ? "var(--p2)" : "var(--p0)";
+    paths2[q].style.fill = v.a === null ? "var(--nodata)" : v.a ? "var(--c3)" : "var(--c0)";
     if (v.a === 1) { nA++; sA += v.p; } else if (v.a === 0) { nN++; sN += v.p; }
   });
   document.getElementById("sub").textContent = "Forecast made " + kyiv(o.ms) + " Kyiv time. Left: our forecast for " + kyiv(target) + " (" + HZ[hz] + "). Right: what really happened at that hour.";
@@ -459,22 +458,21 @@ function hover(e) {
   tip.innerHTML = txt; tip.hidden = false; tip.style.left = (e.clientX + 14) + "px"; tip.style.top = (e.clientY + 14) + "px";
 }
 
-// motion: section tones, reveals, sliding title, scroll progress (all off with "reduce motion")
+// motion: calm reveals, a slowly drifting headline, view dots (all off with "reduce motion")
 const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
-const toned = [[".top", "paper"], ["#hz-tabs", "paper"], ["#past-box", "paper"], ["#grid", "grey"], ["#trip", "grey"], ["#foot", "accent"]];
-const toneIO = new IntersectionObserver(es => { for (const e of es) if (e.isIntersecting) document.body.dataset.tone = e.target.dataset.tone; },
-  {rootMargin: "-48% 0px -48% 0px"});
-for (const [sel, t] of toned) { const el = document.querySelector(sel); el.dataset.tone = t; toneIO.observe(el); }
-const revIO = new IntersectionObserver(es => { for (const e of es) if (e.isIntersecting) { e.target.classList.add("in"); revIO.unobserve(e.target); } }, {rootMargin: "0px 0px -8% 0px"});
-for (const el of document.querySelectorAll(".box, .map, .foot")) { if (!el.classList.contains("foot")) el.classList.add("reveal"); still ? el.classList.add("in") : revIO.observe(el); }
-const h1 = document.querySelector("h1"), prog = document.getElementById("prog");
+const revIO = new IntersectionObserver(es => { for (const e of es) if (e.isIntersecting) { e.target.classList.add("in"); revIO.unobserve(e.target); } }, {rootMargin: "0px 0px -6% 0px"});
+for (const el of document.querySelectorAll(".box, .map, .foot, .lede")) {
+  const onScreen = el.getBoundingClientRect().top < innerHeight;          // visible at load: shown at once, no fade
+  el.classList.add("reveal"); (still || onScreen) ? el.classList.add("in") : revIO.observe(el); }
+const h1 = document.querySelector("h1");
 let ticking = false;
-addEventListener("scroll", () => { if (ticking) return; ticking = true; requestAnimationFrame(() => {
-  const y = scrollY, max = document.documentElement.scrollHeight - innerHeight;
-  prog.style.transform = "scaleX(" + (max > 0 ? Math.min(1, y / max) : 0) + ")";
-  if (!still) h1.style.transform = "translateX(" + (-Math.min(y * 0.35, 260)) + "px)";
-  ticking = false; }); }, {passive: true});
-document.getElementById("go-map").addEventListener("click", () => document.getElementById(mode === "trip" ? "trip" : "grid").scrollIntoView({behavior: still ? "auto" : "smooth", block: "start"}));
+addEventListener("scroll", () => { if (ticking || still) return; ticking = true; requestAnimationFrame(() => {
+  h1.style.transform = "translateY(" + Math.min(scrollY * 0.18, 120) + "px)"; ticking = false; }); }, {passive: true});
+const NAMES = {live: "Forecast", past: "Past days", trip: "Can I go?"};
+const setDots = () => { document.getElementById("dotname").textContent = NAMES[mode];
+  for (const d of document.querySelectorAll(".dot")) d.setAttribute("aria-current", String(d.dataset.for === "tab-" + mode)); };
+for (const d of document.querySelectorAll(".dot")) d.addEventListener("click", () => document.getElementById(d.dataset.for).click());
+for (const id of ["tab-live", "tab-past", "tab-trip"]) document.getElementById(id).addEventListener("click", setDots);
 for (const id of ["raions", "raions2"]) { const g = document.getElementById(id); g.addEventListener("mousemove", hover); g.addEventListener("mouseleave", () => tip.hidden = true); }
 draw();
 </script>
