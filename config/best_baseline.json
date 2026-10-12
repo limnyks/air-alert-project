@@ -1,0 +1,13 @@
+{
+  "best_baseline": "B3",
+  "description": "7-day rolling share",
+  "chosen_on": "validation folds 2026-05-18 -> 2026-07-13 (macro Brier)",
+  "validation_macro_brier": {
+    "B1": 0.091528,
+    "B2": 0.086303,
+    "B3": 0.086027
+  },
+  "chosen_at_utc": "2026-10-12T10:34:53+00:00",
+  "code_commit": "64bb2d6",
+  "note": "chosen before any model is fitted and before any test-window evaluation (D38)"
+}

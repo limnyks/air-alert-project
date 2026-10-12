@@ -104,5 +104,13 @@ class TestLeakage(unittest.TestCase):
         self.assertNotEqual(leakage.check(leaky, self.h, self.times), [])
 
 
+class TestBaselineHelpers(unittest.TestCase):
+    def test_ontime_upto(self):
+        from aaf.baselines import ontime_upto
+        h = hist((1, 3), (5, None))                                   # 2 h finished, then running from hour 5
+        x = (T0 + np.array([0, 2, 4, 6, 10]) * H).astype(np.int64)
+        np.testing.assert_allclose(ontime_upto(h, x) / H, [0, 1, 2, 3, 7])   # running alert counted up to x
+
+
 if __name__ == "__main__":
     unittest.main()
